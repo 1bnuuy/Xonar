@@ -1,36 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## LUMEN
 
-## Getting Started
+[Strøm](https://bunvia.vercel.app) is my 2nd project and also my very first NextJS project. It originated from my need to keep track of my English words, which paves the way for clearer goals and enhances my study efficiency. Moreover, the app features a clean interface with smooth animations and reliable data storage powered by modern technologies.
 
-First, run the development server:
+## Built with
++ NextJS
++ TypeScript
++ Tailwind CSS v4
++ Framer Motion
++ Firebase
++ FontAwesomeIcon
++ Slate
++ JSPDF
++ HTML2CANVAS
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
++ Responsiveness: Seamless adaptability across all devices, ensuring a smooth and consistent experience.
++ Animation: The app uses [Framer Motion](https://motion.dev) to deliver fluid, modern animations, enhancing the experience with interactive and dynamic transitions.
++ To-do List: A simple yet effective task manager that helps organize daily study activities and track progress.
++ Dictionary: A personalized English word bank where users can store, categorize, and revisit their vocabulary, supporting long-term learning goals.
++ Light/Dark Theme: Just an indispensable feature that seems to exist and somewhat has become standard in almost every project today.
++ User-friendly: Easy to start using, perfect for those who seeking a fast experience without having to undergo the hassle of login and signup
