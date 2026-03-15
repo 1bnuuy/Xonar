@@ -1,4 +1,4 @@
-## LUMEN
+## This is a class assignment 
 
 [Strøm](https://bunvia.vercel.app) is my 2nd project and also my very first NextJS project. It originated from my need to keep track of my English words, which paves the way for clearer goals and enhances my study efficiency. Moreover, the app features a clean interface with smooth animations and reliable data storage powered by modern technologies.
 

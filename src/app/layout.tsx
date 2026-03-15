@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Afacad } from "next/font/google";
+import { Inconsolata } from "next/font/google";
 import "./globals.css";
 
-import Wrapper from "@/comp/wrapper/wrapper";
-import Transition from "@/comp/transition/transition";
+import Wrapper from "@/comp/wrapper/main";
 import Header from "@/comp/header/main";
+import Footer from "@/comp/footer/main";
 
-const Font = Afacad({
+const Font = Inconsolata({
   variable: "--CustomFont",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Strøm",
+  title: "XONAR",
   description: "",
 };
 
@@ -23,12 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${Font.variable} antialiased`}>
+      <body
+        className={`${Font.variable} bg-primary grid-background antialiased`}
+      >
         <Wrapper>
-          <Transition>
-            <Header />
-            {children}
-          </Transition>
+          <Header />
+          {children}
+          <Footer />
         </Wrapper>
       </body>
     </html>

@@ -3,25 +3,28 @@
 import Link from "next/link";
 
 import { motion } from "motion/react";
-import { InteractScale } from "@/lib/motion";
 
-import Navigation from "./nav";
+import { _Scale } from "@/lib/motion";
 
-const MotionLink = motion(Link);
+import { Navigation } from "./nav";
+import { Brand } from "../assets/svg";
+
+const MotionLink = motion.create(Link);
 
 export default function Header() {
   return (
-    <div className="fixed left-1/2 flex w-11/12 max-w-[1440px] -translate-x-1/2 items-center justify-between px-4 py-3">
+    <div className="absolute left-1/2 z-50 flex w-11/12 -translate-x-1/2 items-center justify-between py-4">
       <MotionLink
-        variants={InteractScale}
-        initial="initial"
+        variants={_Scale}
+        initial="normal"
         whileHover="hover"
         whileTap="tap"
         key="/"
         href="/"
-        className="text-accent hover:text-accent-hovered active:text-accent-hovered text-4xl font-bold uppercase italic"
+        className="text-contrast flex items-center justify-center gap-2"
       >
-        Strøm
+        <Brand />
+        <span className="text-2xl font-bold tracking-wider">XONAR</span>
       </MotionLink>
 
       <Navigation />

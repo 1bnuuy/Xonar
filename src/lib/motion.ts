@@ -1,53 +1,65 @@
 export const AnimsProps = {
-  animDelay: 0.25,
-  animDuration: 0.3,
-  viewPercent: 0.3,
+  entrance: {
+    duration: 0.45,
+    stagger: 0.3,
+    viewAmount: 0.35,
+    delay: 0.25, //Initial delay
+  },
+
+  interaction: {
+    duration: 0.15,
+  },
+
+  ease: [0.34, 1.56, 0.64, 1],
+} as const;
+
+export const _Scale = {
+  normal: { scale: 1 },
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
 };
 
-export const InteractScale = {
-  initial: { scale: 1 },
-  hover: { scale: 1.1 },
-  tap: { scale: 0.9 },
+export const _Shift = {
+  normal: {
+    x: 0,
+    y: 0,
+    boxShadow: "-4px 4px 0px var(--color-contrast)",
+  },
+
+  hover: {
+    x: 2,
+    y: -2,
+    boxShadow: "-6px 6px 0px var(--color-contrast)",
+
+    transition: {
+      duration: AnimsProps.interaction.duration,
+      ease: AnimsProps.ease,
+    },
+  },
+
+  tap: {
+    x: -2,
+    y: 2,
+    boxShadow: "-2px 2px 0px var(--color-contrast)",
+
+    transition: {
+      duration: AnimsProps.interaction.duration,
+      ease: AnimsProps.ease,
+    },
+  },
 };
 
-export const InteractRelocateLeft = {
-  initial: { scale: 1, x: 0 },
-  hover: { x: -20 },
-  tap: { scale: 0.95, x: -20 },
-};
+export const View = {
+  hidden: {
+    opacity: 0,
+  },
 
-export const InteractRelocateRight = {
-  initial: { scale: 1, x: 0 },
-  hover: { x: 20 },
-  tap: { scale: 0.95, x: 20 },
-};
+  show: {
+    opacity: 1,
 
-export const Scale = {
-  initial: { scale: 0 },
-  animate: { scale: 1 },
-};
-
-export const Fade = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-};
-
-export const FadeInBottom = {
-  initial: { opacity: 0, y: 50 },
-  animate: { opacity: 1, y: 0 },
-};
-
-export const FadeInTop = {
-  initial: { opacity: 0, y: -50 },
-  animate: { opacity: 1, y: 0 },
-};
-
-export const FadeInLeft = {
-  initial: { opacity: 0, x: -50 },
-  animate: { opacity: 1, x: 0 },
-};
-
-export const FadeInRight = {
-  initial: { opacity: 0, x: 50 },
-  animate: { opacity: 1, x: 0 },
+    transition: {
+      duration: AnimsProps.entrance.duration,
+      ease: AnimsProps.ease,
+    },
+  },
 };
