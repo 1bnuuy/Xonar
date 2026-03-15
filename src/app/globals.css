@@ -1,4 +1,61 @@
 @import "tailwindcss";
+@tailwind utilities;
+
+@theme {
+  --breakpoint-xs: 30rem;
+
+  --color-primary: #fafafa;
+
+  --color-accent: #2fa8e3;
+  --color-accent-II: #e7346c;
+
+  --color-tertiary: #e1e1fa;
+
+  --color-contrast: #222222;
+  --color-contrast-II: #fcfcfc;
+
+  --color-success: #c3ff3d;
+  --color-error: #d2697d;
+
+  /*--color-accent: #b4b4fa; 
+  --color-primary-III: #b4d2eb;
+  --color-primary-IV: #c37d87;
+  --color-primary-V: #e6b973; */
+
+  --animate-blink: blink 0.5s step-start infinite alternate;
+
+  @keyframes blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+@layer utilities {
+  .content {
+    padding: 75px 20px;
+    margin: 25px 0;
+    max-width: 1440px;
+  }
+
+  .box {
+    box-shadow: -4px 4px 0px var(--color-contrast);
+    border: 3px solid var(--color-contrast);
+  }
+
+  .grid-background {
+    background-image:
+      linear-gradient(to right, #7d7d7d40 1.5px, transparent 1.5px),
+      linear-gradient(to bottom, #7d7d7d40 1.5px, transparent 1.5px);
+    background-size: 40px 40px;
+  }
+}
 
 body {
   overflow-x: hidden;
