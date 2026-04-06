@@ -37,7 +37,7 @@ export default function Menu() {
       <Modal utility={utility} disUtility={disUtility} input={input} />
 
       <section className="content flex w-full flex-col items-center justify-center gap-[55px]">
-        <Music utility={utility} disUtility={disUtility} input={input} />
+        <Music utility={utility} disUtility={disUtility} input={input} filteredSongs={filteredSongs} />
 
         <Playlist state={state} dispatch={dispatch} />
 
@@ -68,7 +68,7 @@ export default function Menu() {
   );
 }
 
-const Music = ({ utility, disUtility, input }: MusicType) => {
+const Music = ({ utility, disUtility, input, filteredSongs }: MusicType) => {
   return (
     <div className="relative flex w-full min-w-[150px] flex-col items-center justify-start gap-5 md:w-[calc(100%-100px)]">
       <Label text="BROWSE" prev="music-prev" next="music-next" />
@@ -113,7 +113,7 @@ const Music = ({ utility, disUtility, input }: MusicType) => {
         onSlideChange={() => disUtility({ type: "HOVER", payload: null })}
         className="h-[225px] w-full overflow-hidden"
       >
-        {[...(musicInfo || []), newBtn].map((fS) => {
+        {[...(filteredSongs || []), newBtn].map((fS) => {
           return (
             //SwiperSlide must be the direct child of the Swiper component (bruh)
             <SwiperSlide key={fS.id}>

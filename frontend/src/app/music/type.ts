@@ -17,6 +17,7 @@ export type MusicType = {
   utility: InitialUtilityType;
   disUtility: React.Dispatch<UtilityActionType>;
   input: React.RefObject<HTMLInputElement | null>;
+  filteredSongs: DataType[] | undefined
 };
 
 export type LabelType = {

@@ -37,7 +37,7 @@ export default function Card({ utility, disUtility, fS, input }: CardType) {
         if (state.currentID === null && visible === false) toggle();
         dispatch({ type: "SELECT", payload: song });
       }}
-      className={`text-contrast snap-center ${fS.id === "new" && "bg-success overflow-hidden border-3 border-dashed"} border-contrast relative flex h-full w-[150px] shrink-0 flex-col items-start justify-center gap-y-1 border-b-3`}
+      className={`text-contrast cursor-pointer ${fS.id === "new" && "bg-success overflow-hidden border-3 border-dashed"} border-contrast relative flex h-full w-[150px] shrink-0 flex-col items-start justify-center gap-y-1 border-b-3`}
     >
       {song ? (
         <>
@@ -67,7 +67,7 @@ export default function Card({ utility, disUtility, fS, input }: CardType) {
             type="file"
             accept="audio/*"
             title=""
-            className="z-20 size-full appearance-none text-transparent"
+            className="z-20 size-full cursor-pointer appearance-none text-transparent"
             onChange={(e) => {
               const files = e.target.files;
 
