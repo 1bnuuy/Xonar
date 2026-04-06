@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useReducer, useRef } from "react";
 import { InitialPlayer, PlayerReducer } from "./var";
 import { PlayerContextType } from "./type";
 
@@ -19,9 +19,10 @@ export default function PlayerProvider({
   children: React.ReactNode;
 }) {
   const [state, dispatch] = useReducer(PlayerReducer, InitialPlayer);
+  const player = useRef<HTMLAudioElement | null>(null);
 
   return (
-    <PlayerContext.Provider value={{ state, dispatch }}>
+    <PlayerContext.Provider value={{ state, dispatch, player }}>
       {children}
     </PlayerContext.Provider>
   );

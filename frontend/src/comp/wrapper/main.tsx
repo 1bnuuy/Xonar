@@ -32,7 +32,9 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      <span className="from-primary pointer-events-none fixed bottom-0 z-40 h-25 w-screen bg-linear-to-t from-1% to-transparent" />
+      {location !== "/music" && (
+        <span className="from-primary pointer-events-none fixed bottom-0 z-40 h-25 w-screen bg-linear-to-t from-1% to-transparent" />
+      )}
     </motion.main>
   );
 }

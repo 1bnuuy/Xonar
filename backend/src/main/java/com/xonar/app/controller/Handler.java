@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @CrossOrigin(origins = "http://localhost:3000") //Allows the frontend to fetch data from backend
 @RestController //Tells Spring Boot that this class (Handler) handles HTTP requests
 @RequestMapping("/api/data") //Defines base URL after * in localhost:8080/*

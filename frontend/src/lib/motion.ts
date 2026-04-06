@@ -1,6 +1,6 @@
 export const AnimsProps = {
   entrance: {
-    duration: 0.45,
+    duration: 0.35,
     stagger: 0.3,
     viewAmount: 0.75,
     delay: 0.25, //Initial delay

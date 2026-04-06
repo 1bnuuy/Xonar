@@ -9,7 +9,7 @@
   --color-accent: #2fa8e3;
   --color-accent-II: #e7346c;
 
-  --color-tertiary: #e4e4e4;
+  --color-tertiary: #bbbbbb;
 
   --color-contrast: #222222;
   --color-contrast-II: #fcfcfc;
@@ -23,7 +23,6 @@
   --color-primary-V: #e6b973; */
 
   --animate-blink: blink 0.5s step-start infinite alternate;
-  --animate-spin: spin 3s linear infinite;
 
   @keyframes blink {
     0%,
@@ -36,21 +35,12 @@
       opacity: 0;
     }
   }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
 }
 
 @layer utilities {
   .content {
     padding: 75px 20px;
-    margin: 25px 0;
+    margin: 40px 0;
     max-width: 1440px;
   }
 
@@ -65,6 +55,8 @@
       linear-gradient(to bottom, #7d7d7d30 1.5px, transparent 1.5px);
     background-size: 40px 40px;
   }
+
+  /* ----------------------------- */
 
   .custom-scroll::-webkit-scrollbar {
     width: 12px;
@@ -84,32 +76,35 @@
     background: #9e294e;
   }
 
-  .custom-slider::-webkit-slider-thumb {
-    appearance: none;
-    border: none;
-    height: 0.85em;
-    width: 0.85em;
-    border-radius: 4px;
-    background: var(--color-accent);
-    margin-top: -4px;
-  }
+  /* ----------------------------- */
 
-  .custom-slider::-webkit-slider-runnable-track {
-    height: 0.3em;
-    background: var(--color-primary);
-    border: none;
-    border-radius: 3px;
+  .custom-slider {
+    &::-webkit-slider-thumb {
+      appearance: none;
+      border: none;
+      height: 0.85rem;
+      width: 0.85rem;
+      border-radius: 4px;
+      margin-top: -3.5px;
+      cursor: pointer;
+      z-index: 50;
+    }
 
-    .custom-slider:focus {
-      outline: none;
+    &:active::-webkit-slider-thumb {
+      background-color: var(--color-accent-II);
     }
   }
 
-  .anim-pause {
-    -webkit-animation-play-state: paused;
-    -moz-animation-play-state: paused;
-    -o-animation-play-state: paused;
-    animation-play-state: paused;
+  .custom-slider::-webkit-slider-runnable-track {
+    height: 0.4rem;
+    background: var(--color-tertiary);
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .custom-slider:focus {
+    outline: none;
   }
 }
 

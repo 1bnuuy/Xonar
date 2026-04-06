@@ -6,6 +6,10 @@ export const InitialPlayer: InitialPlayerType = {
   time: 0,
   duration: 0,
   pause: true,
+  volume: 100,
+  loop: false,
+  muted: false,
+  shuffle: false,
 };
 
 export const PlayerReducer: (
@@ -14,14 +18,24 @@ export const PlayerReducer: (
 ) => InitialPlayerType = (state, action) => {
   switch (action.type) {
     case "SELECT":
-      const alreadyExist = state.song.find((s) => s.id === action.payload.id);
+      const exist = state.song.find((s) => s.id === action.payload.id);
 
       return {
         ...state,
-        song: alreadyExist ? state.song : [...state.song, action.payload],
+        song: exist ? state.song : [...state.song, action.payload],
         currentID: action.payload.id,
         pause: false,
         time: 0,
+      };
+
+    case "DELETE":
+      const newSong = state.song.filter((s) => s.id !== action.payload);
+
+      return {
+        ...state,
+        song: newSong,
+        currentID: state.currentID === action.payload ? null : state.currentID,
+        pause: newSong.length === 0 ? true : state.pause,
       };
 
     case "PREVIOUS":
@@ -60,6 +74,18 @@ export const PlayerReducer: (
 
     case "DURATION":
       return { ...state, duration: action.payload };
+
+    case "VOLUME":
+      return { ...state, volume: action.payload };
+
+    case "LOOP":
+      return { ...state, loop: !state.loop };
+
+    case "SHUFFLE":
+      return { ...state, shuffle: !state.shuffle };
+
+    case "MUTE":
+      return { ...state, muted: !state.muted };
 
     default:
       return state;

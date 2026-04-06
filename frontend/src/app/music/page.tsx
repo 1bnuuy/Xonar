@@ -1,142 +1,250 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { A11y, Autoplay, Navigation } from "swiper/modules";
+import "swiper/swiper-bundle.css";
+
 import { motion } from "framer-motion";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 
-import { usePlayer } from "@/comp/music/handler";
 import useGet from "@/comp/logic/get";
+import { usePlayer } from "@/comp/music/handler";
 
-import { _Arise, _Scale, _Shift } from "@/lib/motion";
+import { _Arise, _Scale, _Shift, AnimsProps } from "@/lib/motion";
 
-import Post from "@/comp/logic/post";
-import { DataType } from "@/comp/logic/type";
-import { musicInfo } from "./var";
-import { useUI } from "@/comp/assets/UI";
+import Card from "./card";
+import Modal from "./modal";
+import { LabelType, MusicType, PlaylistType } from "./type";
+import { InitialUtility, musicInfo, newBtn, UtilityReducer } from "./var";
 
 export default function Menu() {
-  const { visible, toggle } = useUI();
+  const [utility, disUtility] = useReducer(UtilityReducer, InitialUtility);
   const data = useGet();
-  const [search, setSearch] = useState<string>("");
-  const [hovered, setHovered] = useState<string | number | null>(null);
-  const { state, dispatch } = usePlayer();
+  const { state, dispatch, player } = usePlayer();
+
+  const input = useRef<HTMLInputElement | null>(null);
 
   const filteredSongs = useMemo(() => {
-    return state.song.filter((item) => {
-      return item.title?.toLowerCase().includes(search.toLowerCase());
+    return data?.filter((item) => {
+      return item.title?.toLowerCase().includes(utility.search.toLowerCase());
     });
-  }, [state.song, search]);
+  }, [data, utility.search]);
 
   return (
-    <section className="content flex h-[calc(100dvh-50px)] w-full flex-col items-center justify-center gap-[45px]">
-      <div className="flex w-full items-center justify-start gap-[25px]">
-        <div className="relative h-[30px] w-[400px]">
-          <input
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            type="text"
-            className="bg-tertiary text-contrast size-full px-3 outline-none placeholder:text-gray-500"
-          />
+    <>
+      <Modal utility={utility} disUtility={disUtility} input={input} />
 
-          <span className="border-contrast absolute left-0 h-full w-4 border-2 border-r-0" />
-          <span className="border-contrast absolute right-0 h-full w-4 border-2 border-l-0" />
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className="text-contrast absolute top-1/2 right-2 -translate-y-1/2"
-          />
-        </div>
+      <section className="content flex w-full flex-col items-center justify-center gap-[55px]">
+        <Music utility={utility} disUtility={disUtility} input={input} />
 
-        <button>Sort</button>
-      </div>
+        <Playlist state={state} dispatch={dispatch} />
 
-      <div className="custom-scroll bg-primary border-contrast box flex min-h-[250px] w-full flex-wrap items-center justify-evenly gap-5 overflow-x-hidden overflow-y-auto border-3 p-5">
-        {musicInfo?.map((fS, i) => {
-          const song: DataType = {
-            id: fS.id,
-            title: fS.title,
-            artist: fS.artist,
-            fileURL: fS.fileURL,
-          };
+        {/* <div className="flex w-full items-center justify-start gap-[25px]">
+            <div className="relative h-[30px] w-[400px]">
+              <input
+                placeholder="Search..."
+                value={utility.search}
+                onChange={(e) =>
+                  disUtility({ type: "SEARCH", payload: e.target.value })
+                }
+                type="text"
+                className="bg-tertiary text-contrast size-full px-3 outline-none placeholder:text-gray-500"
+              />
 
+              <span className="border-contrast absolute left-0 h-full w-4 border-2 border-r-0" />
+              <span className="border-contrast absolute right-0 h-full w-4 border-2 border-l-0" />
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                className="text-contrast absolute top-1/2 right-2 -translate-y-1/2"
+              />
+            </div>
+
+            <button>Sort</button>
+          </div> */}
+      </section>
+    </>
+  );
+}
+
+const Music = ({ utility, disUtility, input }: MusicType) => {
+  return (
+    <div className="relative flex w-full min-w-[150px] flex-col items-center justify-start gap-5 md:w-[calc(100%-100px)]">
+      <Label text="BROWSE" prev="music-prev" next="music-next" />
+
+      <Swiper
+        modules={[Navigation, A11y, Autoplay]}
+        spaceBetween={20}
+        slidesPerView={1.5}
+        centeredSlides={true}
+        breakpoints={{
+          // >= 480px (xs)
+          480: {
+            slidesPerView: 2,
+            spaceBetween: 25,
+            centeredSlides: false,
+          },
+
+          // >= 640px (sm)
+          640: {
+            slidesPerView: 3,
+            spaceBetween: 25,
+            centeredSlides: false,
+          },
+
+          // >= 1024px (lg)
+          1024: {
+            slidesPerView: 4,
+            spaceBetween: 30,
+            centeredSlides: false,
+          },
+
+          // >= 1280px (xl)
+          1280: {
+            slidesPerView: 6,
+            spaceBetween: 40,
+            centeredSlides: false,
+          },
+        }}
+        navigation={{ prevEl: ".music-prev", nextEl: ".music-next" }}
+        autoplay={{ disableOnInteraction: false, pauseOnMouseEnter: true }}
+        onSliderMove={() => disUtility({ type: "HOVER", payload: null })}
+        onSlideChange={() => disUtility({ type: "HOVER", payload: null })}
+        className="h-[225px] w-full overflow-hidden"
+      >
+        {[...(musicInfo || []), newBtn].map((fS) => {
+          return (
+            //SwiperSlide must be the direct child of the Swiper component (bruh)
+            <SwiperSlide key={fS.id}>
+              <Card
+                utility={utility}
+                disUtility={disUtility}
+                fS={fS}
+                input={input}
+              />
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
+    </div>
+  );
+};
+
+const Playlist = ({ state, dispatch }: PlaylistType) => {
+  const currentSong = state.song.find((s) => s.id === state.currentID);
+
+  const scroll = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scroll.current) {
+      scroll.current.scrollTo({
+        left: scroll.current.scrollWidth,
+        behavior: "smooth",
+      });
+    }
+  }, [state.song.length]);
+
+  return (
+    <div className="relative flex w-full min-w-[150px] flex-col items-center justify-start gap-5 md:w-[calc(100%-100px)]">
+      <Label text="PLAYING" prev="playlist-prev" next="playlist-next" />
+
+      <div
+        ref={scroll}
+        className="custom-scroll flex size-full h-[225px] items-center justify-start gap-10 overflow-hidden p-4"
+      >
+        {state.song.map((s) => {
           return (
             <motion.div
-              variants={_Scale}
-              initial="normal"
-              whileHover="hover"
-              whileTap="tap"
-              animate={{
-                opacity: hovered !== null && hovered !== fS.id ? 0.5 : 1,
-                scale: hovered !== null && hovered !== fS.id ? 0.9 : 1,
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  y: -45,
+                },
+                show: {
+                  opacity: 1,
+                  y: 0,
+                },
               }}
-              key={fS.id}
-              onHoverStart={() => setHovered(fS.id)}
-              onHoverEnd={() => setHovered(null)}
+              initial="hidden"
+              whileInView="show"
+              whileHover={{
+                y: -12,
+
+                transition: {
+                  duration: AnimsProps.interaction.duration,
+                  ease: AnimsProps.ease,
+                },
+              }}
+              whileTap={{
+                y: -6,
+
+                transition: {
+                  duration: AnimsProps.interaction.duration,
+                  ease: AnimsProps.ease,
+                },
+              }}
               onClick={() => {
-                if (state.currentID === null && visible === false) toggle();
-                dispatch({ type: "SELECT", payload: song });
+                if (!s.id) return;
+
+                if (currentSong?.id === s.id) dispatch({ type: "NEXT" });
+                dispatch({ type: "DELETE", payload: s.id });
               }}
-              className="text-contrast border-contrast relative h-[400px] w-[300px] cursor-pointer rounded-lg border-3 text-2xl font-semibold text-nowrap"
+              key={s.id}
+              className={`${currentSong?.id === s.id ? "border-accent" : "border-tertiary"} flex h-full w-[165px] shrink-0 flex-col items-start justify-center gap-y-1 border-b-3 p-2`}
             >
-              <span className="text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] opacity-10 select-none">
-                {i + 1 > 0 && i + 1 < 10 ? `0${i + 1}` : i + 1}
-              </span>
-
-              <div className="bg-primary absolute -top-0.75 -right-0.75 flex w-[200px] items-center justify-center rounded-bl-lg border-b-3 border-l-3 pb-2 pl-2 text-center">
-                <span className="border-contrast bg-secondary w-full rounded-tr-lg rounded-bl-lg border-3 px-4 py-1">
-                  {fS.title}
-                </span>
+              <div className="bg-accent border-contrast relative size-[150px] shrink-0 overflow-hidden rounded-md border-3">
+                <Image
+                  src="/Pee.webp"
+                  alt="bnuuy"
+                  fill
+                  sizes="200px"
+                  className="object-cover object-center"
+                />
               </div>
 
-              <div className="flex size-full items-center justify-center">
-                <span>{fS.title}</span>
-              </div>
+              <h3 className="text-2xl font-bold capitalize">{s.title}</h3>
 
-              <div className="bg-primary absolute -bottom-0.75 -left-0.75 flex w-[125px] items-center justify-center rounded-tr-lg border-t-3 border-r-3 pt-2 pr-2 text-center">
-                <span className="border-contrast bg-secondary w-full rounded-tr-lg rounded-bl-lg border-3 px-4 py-1">
-                  {fS.artist}
-                </span>
-              </div>
+              <p className="text-contrast">{s.artist}</p>
             </motion.div>
           );
         })}
+      </div>
+    </div>
+  );
+};
 
-        {/* Addition button */}
-        <motion.div
+const Label = ({ text, prev, next }: LabelType) => {
+  const style =
+    "bg-tertiary text-contrast-II size-[35px] cursor-pointer rounded-sm text-2xl font-bold";
+
+  return (
+    <div className="flex w-full">
+      <span className="border-contrast top-3/4 -left-12 z-30 origin-left border-b-3 px-4 py-1 text-center text-2xl font-semibold tracking-widest md:absolute md:-rotate-90 md:text-3xl">
+        {text}
+      </span>
+
+      <div className="ml-auto flex items-center justify-center gap-3">
+        <motion.button
           variants={_Scale}
           initial="normal"
           whileHover="hover"
           whileTap="tap"
-          animate={{
-            opacity: hovered !== null && hovered !== "add" ? 0.5 : 1,
-            scale: hovered !== null && hovered !== "add" ? 0.9 : 1,
-          }}
-          key="add"
-          onHoverStart={() => setHovered("add")}
-          onHoverEnd={() => setHovered(null)}
-          onClick={() =>
-            Post({
-              title: "PooPee's Song",
-              artist: "PooPee",
-              fileURL: "chase.mp3",
-            })
-          }
-          className="text-contrast bg-success border-contrast relative h-[400px] w-[300px] cursor-pointer overflow-hidden rounded-lg border-3 border-dashed text-2xl font-semibold text-nowrap"
+          className={`${style} ${prev}`}
         >
-          <span className="text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] opacity-50 select-none">
-            +
-          </span>
+          &lt;
+        </motion.button>
 
-          <motion.span
-            variants={_Arise}
-            className="bg-accent pointer-events-none absolute bottom-0 flex w-full items-center justify-center"
-          >
-            NEW FILE
-          </motion.span>
-        </motion.div>
+        <motion.button
+          variants={_Scale}
+          initial="normal"
+          whileHover="hover"
+          whileTap="tap"
+          className={`${style} ${next}`}
+        >
+          &gt;
+        </motion.button>
       </div>
-    </section>
+    </div>
   );
-}
+};

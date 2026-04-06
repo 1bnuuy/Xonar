@@ -58,3 +58,8 @@ export type ToggleContextType = {
   visible: boolean;
   toggle: () => void
 } 
+
+export type BorderType = {
+  w: string
+  animate: boolean
+}
