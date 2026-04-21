@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { ToggleContextType } from "./type";
 
 const UIContext = createContext<ToggleContextType | undefined>(undefined);
@@ -17,15 +17,28 @@ export default function UIProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [visible, setVisibility] = useState(false);
+  const [audio, setAudio] = useState(false);
 
-  const toggle = () => {
-    setVisibility(!visible);
+  // useEffect(() => {
+  //   const mediaQuery = window.matchMedia("(max-width: 768px)");
+  //   setIsMobile(mediaQuery.matches);
+
+  //   const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+  //   mediaQuery.addEventListener("change", handler);
+  //   return () => mediaQuery.removeEventListener("change", handler);
+  // }, []);
+
+  const toggleAudio = () => {
+    setAudio(!audio);
   };
 
-  return (
-    <UIContext.Provider value={{ visible, toggle }}>
-      {children}
-    </UIContext.Provider>
+  const value = useMemo(
+    () => ({
+      audio,
+      toggleAudio,
+    }),
+    [audio],
   );
+
+  return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 }

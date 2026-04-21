@@ -14,6 +14,7 @@ export type InitialPlayerType = {
 
 export type PlayerActionType =
   | { type: "SELECT"; payload: DataType }
+  | { type: "PLAY"; payload: DataType[] }
   | { type: "DELETE"; payload: string }
   | { type: "PREVIOUS" }
   | { type: "NEXT" }

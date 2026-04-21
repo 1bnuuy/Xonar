@@ -10,6 +10,11 @@ export const AnimsProps = {
     duration: 0.15,
   },
 
+  loop: {
+    duration: 0.8,
+    delay: 0.15,
+  },
+
   ease: [0.34, 1.56, 0.64, 1],
 } as const;
 
@@ -22,14 +27,10 @@ export const _Scale = {
 export const _Shift = {
   normal: {
     x: 0,
-    y: 0,
-    boxShadow: "-4px 4px 0px var(--color-contrast)",
   },
 
   hover: {
-    x: 2,
-    y: -2,
-    boxShadow: "-6px 6px 0px var(--color-contrast)",
+    x: 6,
 
     transition: {
       duration: AnimsProps.interaction.duration,
@@ -38,9 +39,7 @@ export const _Shift = {
   },
 
   tap: {
-    x: -2,
-    y: 2,
-    boxShadow: "-2px 2px 0px var(--color-contrast)",
+    x: -5,
 
     transition: {
       duration: AnimsProps.interaction.duration,

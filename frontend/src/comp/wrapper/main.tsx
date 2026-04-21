@@ -1,13 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+
 import { AnimsProps } from "@/lib/motion";
-import { usePathname } from "next/navigation";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const location = usePathname();
+  const path = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -25,16 +27,12 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
           },
         },
       }}
-      key={location} //Missing a key breaks motion on route change
+      key={path} //Missing a key breaks motion on route change
       initial="hidden"
       animate="show"
-      className={`bg-primary grid-background relative flex min-h-dvh w-full flex-col items-center justify-between overflow-hidden px-5`}
+      className={`bg-primary relative flex min-h-dvh ${path === "/auth" ? "w-screen":"w-[calc(100%-72px)]"} flex-col items-center justify-between overflow-hidden`}
     >
       {children}
-
-      {location !== "/music" && (
-        <span className="from-primary pointer-events-none fixed bottom-0 z-40 h-25 w-screen bg-linear-to-t from-1% to-transparent" />
-      )}
     </motion.main>
   );
 }

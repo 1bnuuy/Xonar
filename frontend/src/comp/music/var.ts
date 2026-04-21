@@ -18,12 +18,21 @@ export const PlayerReducer: (
 ) => InitialPlayerType = (state, action) => {
   switch (action.type) {
     case "SELECT":
-      const exist = state.song.find((s) => s.id === action.payload.id);
+      const songExist = state.song.find((s) => s.id === action.payload.id);
 
       return {
         ...state,
-        song: exist ? state.song : [...state.song, action.payload],
+        song: songExist ? state.song : [...state.song, action.payload],
         currentID: action.payload.id,
+        pause: false,
+        time: 0,
+      };
+
+    case "PLAY":
+      return {
+        ...state,
+        song: action.payload,
+        currentID: action.payload[0]?.id || state.currentID,
         pause: false,
         time: 0,
       };

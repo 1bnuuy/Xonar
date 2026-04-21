@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
-    "frontend": "next dev",
+    "frontend": "next dev --turbo",
     "backend": "cd ../backend && mvn spring-boot:run",
     "build": "next build",
     "start": "next start",

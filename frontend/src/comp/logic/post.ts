@@ -1,23 +1,32 @@
-"use client";
-
+import { API_URL } from "./api";
 import { PostType } from "./type";
 
-const Post = async ({ title, artist, fileURL }: PostType) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/data`, {
-    method: "POST",
-    headers: {
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify({
-      title,
-      artist,
-      fileURL,
-    }),
-  });
+export const POST = async ({ cover, title, artist, fileURL }: PostType) => {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  if (!res.ok) throw new Error("Failed to create track!");
+  try {
+    const res = await fetch(`${API_URL}/data`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+      body: JSON.stringify({
+        cover,
+        title,
+        artist,
+        fileURL,
+      }),
+    });
 
-  return res.json();
+    if (!res.ok) {
+      throw new Error(`Status ${res.status} - ${await res.text()}`); //res.text is async
+    }
+
+    return await res.json();
+    
+  } catch (err) {
+    console.error(err);
+  }
 };
-
-export default Post;
