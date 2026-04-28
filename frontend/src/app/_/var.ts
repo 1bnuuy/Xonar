@@ -5,11 +5,13 @@ export const InitialUtility: InitialUtilityType = {
   hoveredID: null,
   modal: false,
   file: {
-    cover: "",
+    coverURL: "",
     title: "",
     artist: "",
     fileURL: "",
   },
+  coverObject: null,
+  fileObject: null,
   tab: "FILE",
 };
 
@@ -25,15 +27,23 @@ export const UtilityReducer: (
       return { ...state, hoveredID: action.payload };
 
     case "MODAL":
-      return { ...state, modal: !state.modal };
+      return { ...state, modal: !state.modal, tab: "FILE" };
 
     case "UPLOAD":
       return { ...state, file: { ...state.file, ...action.payload } };
 
+    case "SELECT_FILE":
+      return { ...state, fileObject: action.payload };
+
+    case "SELECT_COVER":
+      return { ...state, coverObject: action.payload };
+
     case "RESET":
       return {
         ...state,
-        file: { cover: "", title: "", artist: "", fileURL: "" },
+        file: { coverURL: "", title: "", artist: "", fileURL: "" },
+        fileObject: null,
+        coverObject: null,
       };
 
     case "TAB":

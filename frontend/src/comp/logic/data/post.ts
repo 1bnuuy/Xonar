@@ -1,42 +1,72 @@
-import { API_URL } from "../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { API_URL, TOAST_DELAY, QUERY_KEYS } from "../key";
 import { clientReload } from "../client";
 import { PostType } from "../type";
+import { useToast } from "@/comp/toast/main";
 
-export const POST = async ({ cover, title, artist, file }: PostType) => {
-  try {
-    const formData = new FormData();
+export const usePost = () => {
+  const queryClient = useQueryClient();
+  const { TOAST } = useToast();
 
-    const track = {
-      cover,
-      title,
-      artist,
-    };
+  return useMutation({
+    mutationKey: QUERY_KEYS.POST,
+    mutationFn: async ({ cover, title, artist, file }: PostType) => {
+      const formData = new FormData();
+      const track = { cover, title, artist };
 
-    formData.append(
-      "track",
-      new Blob([JSON.stringify(track)], {
-        type: "application/json",
-      }),
-    );
+      formData.append(
+        "track",
+        new Blob([JSON.stringify(track)], { type: "application/json" }),
+      );
+      formData.append("image", cover);
+      formData.append("file", file);
 
-    formData.append("file", file);
+      const res = await clientReload({
+        url: `${API_URL}/data`,
+        options: {
+          method: "POST",
+          body: formData,
+        },
+      });
 
-    const res = await clientReload({
-      url: `${API_URL}/data`,
-      options: {
-        method: "POST",
-        body: formData,
-      },
-    });
+      if (!res.ok) {
+        const errorBody = await res.json();
 
-    if (!res.ok) {
-      const errorBody = await res.json();
+        throw new Error(errorBody.message);
+      }
 
-      throw new Error(JSON.stringify(errorBody, null, 2));
-    }
+      return await res.json();
+    },
+    onMutate: (vars) => {
+      const { title } = vars;
 
-    return console.log("YO");
-  } catch (err) {
-    throw err;
-  }
+      TOAST({
+        state: "INFO",
+        message: `Creating track ${title.length > 15 ? `${title.substring(0, 15)}...` : title}...`,
+      });
+    },
+
+    onSuccess: (_res, vars) => {
+      const { title } = vars;
+
+      TOAST({
+        state: "SUCCESS",
+        message: `Track ${title.length > 15 ? `${title.substring(0, 15)}...` : title} has been created`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH });
+    },
+    onError: (err) => {
+      setTimeout(() => {
+        TOAST({
+          state: "ERROR",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Encountered an error while creating tracks",
+        });
+      }, TOAST_DELAY);
+    },
+  });
 };

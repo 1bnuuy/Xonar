@@ -3,6 +3,7 @@ import { DataType } from "../logic/type";
 export type InitialPlayerType = {
   currentID: string | null;
   song: DataType[];
+  seek: number;
   time: number;
   duration: number;
   pause: boolean;
@@ -18,6 +19,7 @@ export type PlayerActionType =
   | { type: "DELETE"; payload: string }
   | { type: "PREVIOUS" }
   | { type: "NEXT" }
+  | { type: "SEEK"; payload: number }
   | { type: "TIME"; payload: number }
   | { type: "DURATION"; payload: number }
   | { type: "PAUSE" }

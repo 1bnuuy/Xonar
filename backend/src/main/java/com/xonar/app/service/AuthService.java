@@ -38,15 +38,15 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthDTO getService(@NonNull Authentication authentication) {
-        return authRepository.findByUsername(authentication.getName())
+        return authRepository.findByEmail(authentication.getName())
             .map(authMapper::toDTO)
             .orElseThrow(() -> new NotFoundException("User not found: " + authentication.getName()));
     }
 
     @Transactional
     public AuthResponse registerService(@Valid AuthDTO dto) {
-        if (authRepository.existsByUsernameIgnoreCase(dto.getUsername())) 
-            throw new ConflictException("Email " + dto.getUsername() + " already exists");
+        if (authRepository.existsByEmailIgnoreCase(dto.getEmail())) 
+            throw new ConflictException("Email " + dto.getEmail() + " already exists");
 
         AuthEntity entity = authMapper.toEntity(dto, encoder.encode(dto.getPassword()));
 
@@ -55,22 +55,12 @@ public class AuthService {
 
         authRepository.save(entity);
 
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String accessToken = jwtUtils.generateAccessToken(userDetails);
-        String refreshToken = jwtUtils.generateRefreshToken(userDetails);
-
-        entity.setRefreshToken(refreshToken);
-        authRepository.save(entity); // I SPENT THE WHOLE NIGHT TO FIX /auth/refresh, TURNED OUT THE DATABASE DIDNT SAVE THE REFRESH TOKEN
-
-        return new AuthResponse(accessToken, refreshToken, "Registered successfully");
+        return new AuthResponse(null, null, "Registered successfully");
     }
 
     @Transactional
     public AuthResponse loginService(@Valid AuthDTO dto) {
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -78,11 +68,11 @@ public class AuthService {
         String accessToken = jwtUtils.generateAccessToken(userDetails);
         String refreshToken = jwtUtils.generateRefreshToken(userDetails);
 
-        AuthEntity entity = authRepository.findByUsername(userDetails.getUsername())
+        AuthEntity entity = authRepository.findByEmail(userDetails.getUsername())
             .orElseThrow(() -> new NotFoundException("User not found after authentication"));
         
         entity.setRefreshToken(refreshToken);
-        authRepository.save(entity);
+        authRepository.save(entity); // I SPENT THE WHOLE NIGHT TO FIX /auth/refresh, TURNED OUT THE DATABASE DIDNT SAVE THE REFRESH TOKEN
 
         return new AuthResponse(accessToken, refreshToken, "Logged in successfully");
     }
@@ -97,7 +87,7 @@ public class AuthService {
         if (user == null)
             throw new TokenException("Token is missing user identity");
 
-        AuthEntity entity = authRepository.findByUsername(user)
+        AuthEntity entity = authRepository.findByEmail(user)
             .orElseThrow(() -> new NotFoundException("User session doesn't exist"));
 
         if (!refreshToken.equals(entity.getRefreshToken())) 
@@ -122,7 +112,7 @@ public class AuthService {
         if (user == null) 
             throw new TokenException("Could not identify user from token");
 
-        AuthEntity entity = authRepository.findByUsername(user)
+        AuthEntity entity = authRepository.findByEmail(user)
             .orElseThrow(() -> new NotFoundException("User session doesnt exist"));
 
         entity.setRefreshToken(null);

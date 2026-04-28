@@ -1,35 +1,65 @@
-import { API_URL } from "../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { API_URL, HREF_DELAY, QUERY_KEYS, TOAST_DELAY } from "../key";
 import { LoginType } from "../type";
+import { useToast } from "@/comp/toast/main";
 
-export const LOGIN = async ({ username, password }: LoginType) => {
-  try {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-      credentials: "include",
-    });
+export const useLogin = () => {
+  const queryClient = useQueryClient();
+  const { TOAST } = useToast();
 
-    if (!res.ok) {
-      const errorBody = await res.json();
+  return useMutation({
+    mutationKey: QUERY_KEYS.LOGIN,
+    mutationFn: async ({ email, password }: LoginType) => {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
 
-      throw new Error(JSON.stringify(errorBody, null, 2));
-    }
+      if (!res.ok) {
+        const errorBody = await res.json();
 
-    const result = await res.json();
+        throw new Error(errorBody.message);
+      }
 
-    if (result && result.accessToken) {
-      localStorage.setItem("token", result.accessToken);
-      console.log(result.message);
+      const result = await res.json();
+
+      if (result && result.accessToken)
+        localStorage.setItem("token", result.accessToken);
+      else console.warn("No token");
 
       return result;
-    } else {
-      console.warn("No token");
-      return result;
-    }
-  } catch (err) {
-    throw err;
-  }
+    },
+    onSuccess: (_res, vars) => {
+      const { email } = vars;
+
+      setTimeout(() => {
+        TOAST({
+          state: "SUCCESS",
+          message: `Yo ${email.split("@")[0]}`,
+        });
+      }, TOAST_DELAY);
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, HREF_DELAY);
+
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH });
+    },
+    onError: (err) => {
+      setTimeout(() => {
+        TOAST({
+          state: "ERROR",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Authentication encountered an error",
+        });
+      }, TOAST_DELAY);
+    },
+  });
 };

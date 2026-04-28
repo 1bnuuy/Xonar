@@ -25,11 +25,14 @@ public class TrackEntity {
     private String id;
 
     @Indexed private String owner;
-    @NotBlank private String cover;
+    private String coverURL;
     @NotBlank private String title;
     @NotBlank private String artist;
     private String fileURL;
 
     @Builder.Default
     private Boolean favorited = false;
+
+    private String coverPublicId;
+    private String filePublicId;
 }

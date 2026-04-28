@@ -1,30 +1,72 @@
-import { API_URL } from "../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { API_URL, HREF_DELAY, QUERY_KEYS, TOAST_DELAY } from "../key";
 import { clientReload } from "../client";
 
-export const LOGOUT = async () => {
-  try {
-    const res = await clientReload({
-      url: `${API_URL}/auth/logout`,
-      options: {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
+import { useToast } from "@/comp/toast/main";
+
+export const useLogout = () => {
+  const queryClient = useQueryClient();
+  const { TOAST } = useToast();
+
+  return useMutation({
+    mutationKey: QUERY_KEYS.LOGOUT,
+    mutationFn: async () => {
+      const res = await clientReload({
+        url: `${API_URL}/auth/logout`,
+        options: {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          credentials: "include",
         },
-        credentials: "include",
-      },
-    });
+      });
 
-    if (!res.ok) {
-      const errorBody = await res.json();
+      if (!res.ok) {
+        const errorBody = await res.json();
 
-      throw new Error(JSON.stringify(errorBody, null, 2));
-    }
+        throw new Error(errorBody.message);
+      }
 
-    localStorage.clear();
+      return;
+    },
 
-    return console.log("Logged out successfully");
-  } catch (err) {
-    localStorage.clear();
-    throw err;
-  }
+    onMutate: () => {
+      TOAST({
+        state: "INFO",
+        message: "Logging out...",
+      });
+    },
+
+    onSuccess: () => {
+      setTimeout(() => {
+        TOAST({
+          state: "SUCCESS",
+          message: "Logged out successfully, you are free to go!",
+        });
+      }, TOAST_DELAY);
+    },
+
+    onError: (err) => {
+      setTimeout(() => {
+        TOAST({
+          state: "ERROR",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Encountered an error while logging out",
+        });
+      }, TOAST_DELAY);
+    },
+
+    onSettled: () => {
+      localStorage.clear();
+      queryClient.clear();
+
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, HREF_DELAY);
+    },
+  });
 };

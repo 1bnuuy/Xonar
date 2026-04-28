@@ -1,35 +1,60 @@
-import { API_URL } from "../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { API_URL, HREF_DELAY, QUERY_KEYS, TOAST_DELAY } from "../key";
 import { RegisterType } from "../type";
 
-export const REGISTER = async ({ username, password }: RegisterType) => {
-  try {
-    const res = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-      credentials: "include", // Spent 2 hours debugging cookie not storing in browser, eventually found out that I didnt include this mf
-    });
+import { useToast } from "@/comp/toast/main";
 
-    if (!res.ok) {
-      const errorBody = await res.json();
+export const useRegister = () => {
+  const queryClient = useQueryClient();
+  const { TOAST } = useToast();
 
-      throw new Error(JSON.stringify(errorBody, null, 2));
-    }
+  return useMutation({
+    mutationKey: QUERY_KEYS.REGISTER,
+    mutationFn: async ({ email, password }: RegisterType) => {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
 
-    const result = await res.json();
+      if (!res.ok) {
+        const errorBody = await res.json();
 
-    if (result && result.accessToken) {
-      localStorage.setItem("token", result.accessToken);
-    } else {
-      console.warn("No token");
-    }
+        throw new Error(errorBody.message);
+      }
 
-    console.log(result.message);
+      return await res.json();
+    },
 
-    return result;
-  } catch (err) {
-    throw err;
-  }
+    onMutate: () => {
+      TOAST({
+        state: "INFO",
+        message: "Creating a new account for you...",
+      });
+    },
+
+    onSuccess: (_res, vars) => {
+      setTimeout(() => {
+        window.location.href = "/";
+      }, HREF_DELAY);
+
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH });
+    },
+
+    onError: (err) => {
+      setTimeout(() => {
+        TOAST({
+          state: "ERROR",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Encountered an error while signing in",
+        });
+      }, TOAST_DELAY);
+    },
+  });
 };

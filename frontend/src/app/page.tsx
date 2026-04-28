@@ -5,25 +5,23 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faShuffle } from "@fortawesome/free-solid-svg-icons";
 
-import Image from "next/image";
-import { useEffect, useMemo, useReducer, useRef } from "react";
+import { useMemo, useReducer, useRef } from "react";
 
 import { useData } from "@/comp/logic/get";
 import { usePlayer } from "@/comp/music/handler";
 import { Label } from "@/comp/assets/label";
 
-import { _Arise, _Scale, _Shift, AnimsProps } from "@/lib/motion";
+import { _Scale } from "@/lib/motion";
 
-import { Card } from "./_/card";
-import { PlaylistType } from "./_/type";
+import { MotionCard } from "./_/card";
 import { InitialUtility, UtilityReducer } from "./_/var";
 import Loading from "./_/load";
 import Header from "./_/header";
 
-export default function Menu() {
+export default function Music() {
   const { state, dispatch } = usePlayer();
   const [utility, disUtility] = useReducer(UtilityReducer, InitialUtility);
-  const { data, FETCH, loading, authenticated } = useData();
+  const { data, loading, authenticated } = useData();
 
   const input = useRef<HTMLInputElement | null>(null);
 
@@ -39,7 +37,7 @@ export default function Menu() {
     <>
       <Header utility={utility} disUtility={disUtility} input={input} />
 
-      <section className="content relative flex h-[calc(100dvh-77px)] w-full max-w-[900px]! flex-col items-center gap-y-10 overflow-hidden">
+      <section className="content relative flex h-[calc(100dvh-77px)] w-full max-w-225! flex-col items-center gap-y-10 overflow-hidden">
         <div className="max-xs:flex-col max-xs:justify-center flex w-full items-center justify-between gap-y-6 pr-3">
           <Label text="My Music" />
 
@@ -53,7 +51,6 @@ export default function Menu() {
                 if (!data) return;
 
                 dispatch({ type: "PLAY", payload: data });
-                console.log(state.song);
               }}
               className={style}
             >
@@ -75,33 +72,92 @@ export default function Menu() {
           </div>
         </div>
 
-        <div className="custom-scroll flex h-5/6 w-full max-w-[900px] flex-col items-start gap-y-3 overflow-x-hidden overflow-y-auto pr-3">
-          <AnimatePresence>
+        <div className="custom-scroll flex h-5/6 w-full max-w-225 flex-col items-start gap-y-4 overflow-x-hidden overflow-y-auto pr-3">
+          {/* <Card /> has to be the direct child of <AnimatePresence /> for the exit animation to work bruh */}
+
+          {/* To resolve the popLayout doesn't work with exit animation (child props are delayed on unmounting), 
+          there are 2 ways: 
+          1. Use ref on custom component (<Card />), make the component itself a motion component instead of its content
+          2. Don't use custom components at all, instead of map()... <Card />, 
+          use map()... <div>...</div> 
+          <-- <div>...</div> is the content of <Card />
+          (silly me, I had to use ref for custom component)
+          It's redundant to pass ref as motion.create() handles it (ref) itself
+          
+          => The main reason was popLayout take the direct child as <Card /> 
+          instead of its content which is motion.div */}
+
+          <AnimatePresence mode="popLayout">
             {loading ? (
-              <Loading />
+              <Loading key="loading" />
+            ) : data.length ? (
+              [...(Array.isArray(FData) ? FData : [FData])]
+                .sort((a, b) => {
+                  const fav = (b.favorited ? 1 : 0) - (a.favorited ? 1 : 0);
+
+                  if (fav !== 0) return fav;
+
+                  return 0;
+                })
+                .map((fS, i) => {
+                  return (
+                    <MotionCard
+                      custom={i}
+                      layout
+                      key={fS.id}
+                      disUtility={disUtility}
+                      fS={fS}
+                      variants={{
+                        hidden: {
+                          opacity: 0,
+                          x: -75,
+                          y: 0,
+                        },
+
+                        show: (i) => ({
+                          x: 0,
+
+                          transition: {
+                            delay: Math.log(i + 1) * 0.125,
+                          },
+                        }),
+
+                        inactive: {
+                          opacity: 1,
+                          x: 0,
+                          y: 0,
+                        },
+
+                        active: {
+                          opacity: 0.35,
+                          x: 0,
+                          y: 3,
+                        },
+
+                        exit: {
+                          opacity: 0,
+                          x: 75,
+                          y: 0,
+                        },
+                      }}
+                      initial="hidden"
+                      whileInView="show"
+                      animate={
+                        utility.hoveredID !== null &&
+                        utility.hoveredID !== fS.id
+                          ? "active"
+                          : "inactive"
+                      }
+                      exit="exit"
+                    />
+                  );
+                })
             ) : (
-              <>
-                {data.length ? (
-                  [...(Array.isArray(FData) ? FData : [FData])].map((fS, i) => {
-                    return (
-                      <Card
-                        key={fS.id}
-                        utility={utility}
-                        disUtility={disUtility}
-                        fS={fS}
-                        fetchData={FETCH}
-                        index={i}
-                      />
-                    );
-                  })
-                ) : (
-                  <p className="w-full text-center text-lg font-semibold">
-                    {!authenticated
-                      ? "Please log in to add songs!"
-                      : "You haven't added any songs yet!"}
-                  </p>
-                )}
-              </>
+              <p className="w-full text-center text-lg font-semibold">
+                {!authenticated
+                  ? "Please log in to add songs!"
+                  : "You haven't added any songs yet!"}
+              </p>
             )}
           </AnimatePresence>
         </div>
@@ -109,86 +165,3 @@ export default function Menu() {
     </>
   );
 }
-
-const Playlist = ({ state, dispatch }: PlaylistType) => {
-  const currentSong = state.song.find((s) => s.id === state.currentID);
-
-  const scroll = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (scroll.current) {
-      scroll.current.scrollTo({
-        left: scroll.current.scrollWidth,
-        behavior: "smooth",
-      });
-    }
-  }, [state.song.length]);
-
-  return (
-    <div className="relative flex w-full min-w-[150px] flex-col items-center justify-start gap-5 md:w-[calc(100%-100px)]">
-      <Label text="PLAYING" />
-
-      <div
-        ref={scroll}
-        className="flex size-full h-[225px] items-center justify-start gap-10 overflow-hidden p-4"
-      >
-        {state.song.map((s) => {
-          return (
-            <motion.div
-              variants={{
-                hidden: {
-                  opacity: 0,
-                  y: -45,
-                },
-                show: {
-                  opacity: 1,
-                  y: 0,
-                },
-              }}
-              initial="hidden"
-              whileInView="show"
-              whileHover={{
-                y: -12,
-
-                transition: {
-                  duration: AnimsProps.interaction.duration,
-                  ease: AnimsProps.ease,
-                },
-              }}
-              whileTap={{
-                y: -6,
-
-                transition: {
-                  duration: AnimsProps.interaction.duration,
-                  ease: AnimsProps.ease,
-                },
-              }}
-              onClick={() => {
-                if (!s.id) return;
-
-                if (currentSong?.id === s.id) dispatch({ type: "NEXT" });
-                dispatch({ type: "DELETE", payload: s.id });
-              }}
-              key={s.id}
-              className={`${currentSong?.id === s.id ? "border-accent" : "border-tertiary"} flex h-full w-[165px] shrink-0 flex-col items-start justify-center gap-y-1 border-b-3 p-2`}
-            >
-              <div className="bg-accent border-contrast relative size-[150px] shrink-0 overflow-hidden rounded-md border-3">
-                <Image
-                  src="/Pee.webp"
-                  alt="bnuuy"
-                  fill
-                  sizes="200px"
-                  className="object-cover object-center"
-                />
-              </div>
-
-              <h3 className="text-2xl font-bold capitalize">{s.title}</h3>
-
-              <p className="text-contrast">{s.artist}</p>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};

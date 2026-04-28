@@ -13,6 +13,8 @@ import Music from "@/comp/music/main";
 import Wrapper from "@/comp/wrapper/main";
 import Sidebar from "@/comp/sidebar/main";
 import DataProvider from "@/comp/logic/get";
+import ToastProvider from "@/comp/toast/main";
+import QueryProvider from "@/comp/wrapper/tanstack";
 
 const Font = Comfortaa({
   variable: "--CustomFont",
@@ -34,16 +36,20 @@ export default function RootLayout({
       <body
         className={`${Font.variable} bg-primary flex items-start antialiased`}
       >
-        <DataProvider>
-          <UIProvider>
-            <PlayerProvider>
-              <Music />
-              <Sidebar />
+        <QueryProvider>
+          <DataProvider>
+            <UIProvider>
+              <ToastProvider>
+                <PlayerProvider>
+                  <Music />
+                  <Sidebar />
 
-              <Wrapper>{children}</Wrapper>
-            </PlayerProvider>
-          </UIProvider>
-        </DataProvider>
+                  <Wrapper>{children}</Wrapper>
+                </PlayerProvider>
+              </ToastProvider>
+            </UIProvider>
+          </DataProvider>
+        </QueryProvider>
       </body>
     </html>
   );

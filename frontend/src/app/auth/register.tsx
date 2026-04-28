@@ -3,13 +3,29 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEye } from "@fortawesome/free-regular-svg-icons";
 
-import { REGISTER } from "@/comp/logic/auth/register";
-
 import { AuthInputType, AuthType } from "./type";
 
+import { useRegister } from "@/comp/logic/auth/register";
+import { RegisterType } from "@/comp/logic/type";
+import { useLogin } from "@/comp/logic/auth/login";
+
 export default function Register({ auth, disAuth }: AuthType) {
-  const email = auth.email.trim();
-  const password = auth.password.trim();
+  const { mutate: registerMutate } = useRegister();
+  const { mutate: loginMutate } = useLogin();
+
+  const email = auth.email;
+  const password = auth.password;
+
+  const Register = ({ email, password }: RegisterType) => {
+    registerMutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          loginMutate({ email, password });
+        },
+      },
+    );
+  };
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-6">
@@ -23,23 +39,19 @@ export default function Register({ auth, disAuth }: AuthType) {
 
       <form
         autoComplete="off"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
 
-          if (!email || !password) {
-            console.error("Registeration fields can't be blank");
-            return;
-          }
-
-          REGISTER({ username: email, password: password });
+          Register({ email, password });
         }}
-        className="flex w-11/12 max-w-[500px] min-w-75 flex-col items-center justify-center gap-y-4"
+        className="flex w-11/12 max-w-125 min-w-75 flex-col items-center justify-center gap-y-4"
       >
         <Input auth={auth} disAuth={disAuth} type="EMAIL" />
         <Input auth={auth} disAuth={disAuth} type="PASSWORD" />
 
         <button
           type="submit"
+          onClick={() => console.log(email, password)}
           className="bg-accent text-contrast-II w-full rounded-md py-2 text-lg font-semibold"
         >
           Create
@@ -58,7 +70,7 @@ export default function Register({ auth, disAuth }: AuthType) {
 
 const Input = ({ auth, disAuth, type }: AuthInputType) => {
   return (
-    <div className="bg-tertiary relative flex h-[45px] w-full items-center gap-x-4 overflow-hidden rounded-md px-3">
+    <div className="bg-tertiary relative flex h-11.25 w-full items-center gap-x-4 overflow-hidden rounded-md px-3">
       <input
         autoComplete="off"
         required

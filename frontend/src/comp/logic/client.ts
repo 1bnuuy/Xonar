@@ -1,4 +1,4 @@
-import { API_URL } from "./api";
+import { API_URL } from "./key";
 import { ClientReloadType } from "./type";
 
 export const clientReload = async ({ url, options = {} }: ClientReloadType) => {
@@ -19,7 +19,8 @@ export const clientReload = async ({ url, options = {} }: ClientReloadType) => {
     });
 
     const { accessToken: newToken, message } = await refreshRes.json();
-    
+    console.log(message);
+
     if (refreshRes.ok) {
       localStorage.setItem("token", newToken);
 
@@ -33,9 +34,7 @@ export const clientReload = async ({ url, options = {} }: ClientReloadType) => {
       });
     } else {
       localStorage.clear();
-
-      // window.location.href = "/auth";
-
+      
       throw new Error(message);
     }
   }

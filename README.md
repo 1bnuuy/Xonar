@@ -14,10 +14,11 @@
   - [Spring Boot](https://spring.io)
 - Database:
   - [MongoDB](https://www.mongodb.com)
+  - [Cloudinary] (https://cloudinary.com)
 - Miscellaneous:
   - [MP3tag.js](https://mp3tag.js.org)
   - [FontAwesome](https://fontawesome.com)
-  - [SwiperJS](https://swiperjs.com)
+  - [Tanstack Query](https://tanstack.com/query/latest)
 
 ## Deployment
 

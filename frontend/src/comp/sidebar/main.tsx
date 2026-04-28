@@ -20,6 +20,7 @@ import { useData } from "../logic/get";
 import { Brand } from "./brand";
 import { links } from "./var";
 import Modal from "./modal";
+import { useToast } from "../toast/main";
 
 const MotionLink = motion.create(Link);
 
@@ -27,7 +28,8 @@ export default function Sidebar() {
   const path = usePathname();
   const { audio } = useUI();
   const [utility, disUtility] = useReducer(UtilityReducer, InitialUtility);
-  const { FETCH, authenticated, username } = useData();
+  const { FETCH, authenticated, email } = useData();
+  const { TOAST } = useToast();
 
   const isAvail = AvailablePaths.includes(path);
 
@@ -61,11 +63,8 @@ export default function Sidebar() {
             </Link>
 
             <button
-              onClick={() => {
-                disUtility({ type: "TAB", payload: "FILE" });
-                disUtility({ type: "MODAL" });
-              }}
-              className="bg-tertiary text-subtext hover:bg-accent active:bg-accent hover:text-contrast-II active:text-contrast-II size-[50px] shrink-0 cursor-pointer rounded-full text-5xl transition-[background,color]"
+              onClick={() => disUtility({ type: "MODAL" })}
+              className="bg-tertiary text-subtext hover:bg-accent active:bg-accent hover:text-contrast-II active:text-contrast-II size-12.5 shrink-0 cursor-pointer rounded-full text-5xl transition-[background,color]"
             >
               +
             </button>
@@ -80,7 +79,7 @@ export default function Sidebar() {
                     whileTap="tap"
                     href={l.path}
                     key={l.path}
-                    className={`relative flex size-[50px] shrink-0 items-center justify-center rounded-md text-2xl font-semibold ${l.path === path ? "text-accent" : "text-subtext hover:bg-tertiary/50 active:bg-tertiary/50"}`}
+                    className={`relative flex size-12.5 shrink-0 items-center justify-center rounded-md text-2xl font-semibold ${l.path === path ? "text-accent" : "text-subtext hover:bg-tertiary/50 active:bg-tertiary/50"}`}
                   >
                     <h3 className="sr-only">{l.title}</h3>
                     <FontAwesomeIcon icon={l.icon} />
@@ -93,7 +92,7 @@ export default function Sidebar() {
                   layoutId="highlight"
                   animate={{ y: active * (50 + 16) }} // 50px (link's size) + 16px (gap)
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="bg-tertiary absolute left-1/2 -z-10 size-[50px] -translate-x-1/2 rounded-md"
+                  className="bg-tertiary absolute left-1/2 -z-10 size-12.5 -translate-x-1/2 rounded-md"
                 />
               )}
 
@@ -104,11 +103,11 @@ export default function Sidebar() {
                 whileTap="tap"
                 href={authenticated ? "/dashboard" : "/auth"}
                 key="/auth"
-                className={`text-subtext bg-tertiary relative mt-auto flex size-[50px] shrink-0 items-center justify-center rounded-md text-2xl font-semibold ${path === "/profile" && "ring-accent ring-offset-secondary ring-2 ring-offset-2"}`}
+                className={`text-subtext bg-tertiary relative mt-auto flex size-12.5 shrink-0 items-center justify-center rounded-md text-2xl font-semibold ${path === "/profile" && "ring-accent ring-offset-secondary ring-2 ring-offset-2"}`}
               >
                 <h3 className="sr-only">Account</h3>
                 {authenticated ? (
-                  <span className="capitalize">{username[0]}</span>
+                  <span className="capitalize">{email[0]}</span>
                 ) : (
                   <FontAwesomeIcon icon={faUser} />
                 )}

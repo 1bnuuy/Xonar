@@ -15,7 +15,8 @@ import lombok.Setter;
 @Builder
 public class TrackDTO {
     private String id;
-    @NotBlank private String cover;
+    
+    private String coverURL;
     @NotBlank private String title;
     @NotBlank private String artist;
     private String fileURL;

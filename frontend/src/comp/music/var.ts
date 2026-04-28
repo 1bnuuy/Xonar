@@ -3,6 +3,7 @@ import { InitialPlayerType, PlayerActionType } from "./type";
 export const InitialPlayer: InitialPlayerType = {
   currentID: null,
   song: [],
+  seek: 0,
   time: 0,
   duration: 0,
   pause: true,
@@ -77,6 +78,9 @@ export const PlayerReducer: (
 
     case "PAUSE":
       return { ...state, pause: !state.pause };
+
+    case "SEEK":
+      return { ...state, seek: action.payload };
 
     case "TIME":
       return { ...state, time: action.payload };

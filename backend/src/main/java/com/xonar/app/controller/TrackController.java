@@ -33,8 +33,8 @@ public class TrackController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> create(@RequestPart("track") @Valid TrackDTO dto, @RequestPart("file") MultipartFile file) {
-        return ResponseEntity.ok(trackService.createService(dto, file));
+    public ResponseEntity<TrackDTO> create(@RequestPart("track") @Valid TrackDTO dto, @RequestPart("file") MultipartFile file, @RequestPart("image") MultipartFile image) {
+        return ResponseEntity.ok(trackService.createService(dto, file, image));
     }
 
     @PatchMapping("/{id}")

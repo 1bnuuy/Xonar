@@ -1,8 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { _Scale } from "@/lib/motion";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
+
+import { motion } from "framer-motion";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAnglesDown,
@@ -17,11 +20,13 @@ import {
   faVolumeLow,
   faVolumeMute,
 } from "@fortawesome/free-solid-svg-icons";
-import { useCallback, useEffect, useRef } from "react";
+
 import { usePlayer } from "./handler";
+
 import { useUI } from "../assets/UI";
 import { AvailablePaths } from "../assets/var";
-import { usePathname } from "next/navigation";
+
+import { _Scale } from "@/lib/motion";
 
 export default function Music() {
   const path = usePathname();
@@ -29,6 +34,8 @@ export default function Music() {
   const { state, dispatch, player } = usePlayer();
 
   const request = useRef<number | undefined>(undefined);
+  const seekValue = useRef<number>(0);
+  const isDragging = useRef<boolean>(false);
 
   const isAvail = AvailablePaths.includes(path);
 
@@ -45,20 +52,36 @@ export default function Music() {
   const currentSong = state.song.find((s) => s.id === state.currentID);
 
   const animate = useCallback(() => {
-    if (player.current && state.duration > 0) {
-      const safeTime = Math.min(player.current.currentTime, state.duration); //Making sure the time not exceed 100%
+    const loop = () => {
+      if (player.current && state.duration > 0) {
+        if (!isDragging.current) {
+          const safeTime = Math.min(player.current.currentTime, state.duration); //Making sure the time not exceed 100%
 
-      dispatch({ type: "TIME", payload: safeTime });
+          dispatch({ type: "TIME", payload: safeTime });
+          seekValue.current = (safeTime / state.duration) * 100;
 
-      request.current = requestAnimationFrame(animate); //Handles audio's current time
-    }
-  }, [state.duration, dispatch]);
+          request.current = requestAnimationFrame(loop); //Handles audio's current time
+        }
+      }
+    };
+    loop();
+  }, [state.duration, dispatch, player]);
 
-  const handleCanPlay = () => {
-    if (!state.pause) {
-      player.current?.play();
-    }
+  const play = () => {
+    if (!state.pause) player.current?.play();
   };
+
+  useEffect(() => {
+    if (player.current) player.current.currentTime = state.seek;
+  }, [state.seek, player]);
+
+  useEffect(() => {
+    if (player.current) {
+      player.current.volume = state.volume / 100;
+
+      player.current.muted = state.volume === 0 || state.muted;
+    }
+  }, [state.volume, state.muted, player]);
 
   useEffect(() => {
     if (!state.pause) {
@@ -76,21 +99,21 @@ export default function Music() {
     const audio = player.current;
     if (!audio) return;
 
-    if (!state.pause && audio.paused) {
-      audio.play();
-    } else if (state.pause && !audio.paused) {
-      audio.pause();
-    }
-  }, [state.pause]);
+    if (!state.pause && audio.paused)
+      audio.play().catch((err) => {
+        console.warn("Playback prevented:", err);
+      });
+    else if (state.pause && !audio.paused) audio.pause();
+  }, [state.pause, player]);
 
   return (
     <>
       {isAvail && (
         <motion.aside
-          className={`fixed ${audio ? "bottom-0" : "-bottom-25"} right-0 z-50 h-25 w-full min-w-[269px] transition-[bottom]`}
+          className={`fixed ${audio ? "bottom-0" : "-bottom-25"} right-0 z-50 h-25 w-full min-w-67.25 transition-[bottom]`}
         >
           <div className="bg-secondary relative flex size-full items-center justify-between gap-5 border-t-2 px-8 py-2.5 max-md:px-5">
-            <div className="flex max-w-[275px] flex-1 items-center gap-5 max-sm:hidden">
+            <div className="flex max-w-68.75 flex-1 items-center gap-5 max-sm:hidden">
               <div
                 // style={{
                 //   boxShadow:
@@ -100,7 +123,7 @@ export default function Music() {
                 className={`relative size-18 shrink-0 overflow-hidden rounded-md`}
               >
                 <Image
-                  src="/Pee.webp"
+                  src={currentSong?.coverURL || "/Pee.webp"}
                   alt="bnuuy"
                   fill
                   sizes="100px"
@@ -118,7 +141,7 @@ export default function Music() {
               </div>
             </div>
 
-            <div className="flex h-full max-w-[575px] flex-2 flex-col justify-center gap-2">
+            <div className="flex h-full max-w-143.75 flex-2 flex-col justify-center gap-2">
               <div className="flex w-full items-center justify-center gap-8 *:cursor-pointer max-sm:gap-5">
                 <motion.button
                   variants={_Scale}
@@ -155,8 +178,9 @@ export default function Music() {
                     if (!currentSong) return;
 
                     dispatch({ type: "PAUSE" });
+                    console.log(seekValue);
                   }}
-                  className={`${state.pause ? "bg-muted" : "bg-accent"} text-tertiary flex size-[45px] items-center justify-center rounded-md text-3xl`}
+                  className={`${state.pause ? "bg-muted" : "bg-accent"} text-tertiary flex size-11.25 items-center justify-center rounded-md text-3xl`}
                 >
                   <FontAwesomeIcon icon={state.pause ? faPlay : faPause} />
                 </motion.button>
@@ -198,24 +222,51 @@ export default function Music() {
                     max={100}
                     value={
                       state.duration > 0
-                        ? (state.time / state.duration) * 100
+                        ? isDragging.current
+                          ? seekValue.current
+                          : (state.time / state.duration) * 100
                         : 0
                     }
                     onChange={(e) => {
-                      const percent = Number(e.target.value);
+                      if (player.current && isDragging.current) {
+                        seekValue.current = e.target.valueAsNumber;
 
-                      if (player.current)
-                        player.current.currentTime =
-                          (percent / 100) * state.duration;
+                        dispatch({
+                          type: "TIME",
+                          payload: (seekValue.current / 100) * state.duration,
+                        });
+                      }
                     }}
                     onMouseDown={() => {
-                      if (state.pause && currentSong) {
+                      isDragging.current = true;
+
+                      if (!state.pause && player.current) {
                         dispatch({ type: "PAUSE" });
                       }
                     }}
+                    onMouseUp={() => {
+                      isDragging.current = false;
+
+                      if (player.current) {
+                        dispatch({ type: "SEEK", payload: state.time });
+
+                        if (state.pause) dispatch({ type: "PAUSE" });
+                      }
+                    }}
                     onTouchStart={() => {
-                      if (state.pause && currentSong) {
+                      isDragging.current = true;
+
+                      if (!state.pause && player.current) {
                         dispatch({ type: "PAUSE" });
+                      }
+                    }}
+                    onTouchEnd={() => {
+                      isDragging.current = false;
+
+                      if (player.current) {
+                        dispatch({ type: "SEEK", payload: state.time });
+
+                        if (state.pause) dispatch({ type: "PAUSE" });
                       }
                     }}
                     className={`custom-slider ${state.pause ? "[&::-webkit-slider-thumb]:bg-muted" : "[&::-webkit-slider-thumb]:bg-accent"} peer absolute z-20 size-full appearance-none outline-none`}
@@ -223,9 +274,9 @@ export default function Music() {
 
                   <span
                     style={{
-                      width: `calc(${state.duration > 0 ? (state.time / state.duration) * 100 : 0}% + ${state.time / state.duration <= 0.2 ? "3px" : "0px"})`,
+                      width: `calc(${state.duration > 0 ? (state.time / state.duration) * 100 : 0}% + ${state.time / state.duration <= 0.2 ? "3px" : "0px"}`,
                     }}
-                    className={`${state.pause ? "bg-muted" : "bg-accent"} peer-active:bg-muted pointer-events-none absolute top-0 left-0 z-30 h-full rounded-l-md`}
+                    className={`${state.pause ? "bg-muted" : "bg-accent"} peer-active:bg-muted pointer-events-none absolute top-0 left-0 z-30 h-full max-w-full rounded-l-md`}
                   />
                 </div>
 
@@ -233,7 +284,7 @@ export default function Music() {
               </div>
             </div>
 
-            <div className="flex max-w-[275px] flex-1 items-center justify-center gap-4 max-sm:hidden">
+            <div className="flex max-w-68.75 flex-1 items-center justify-center gap-4 max-sm:hidden">
               <button onClick={() => dispatch({ type: "MUTE" })}>
                 <FontAwesomeIcon
                   icon={
@@ -250,16 +301,11 @@ export default function Music() {
                   max={100}
                   value={state.muted ? 0 : state.volume}
                   onChange={(e) => {
-                    const vol = e.target.valueAsNumber;
-
                     if (state.muted) dispatch({ type: "MUTE" });
-                    dispatch({ type: "VOLUME", payload: vol });
-
-                    if (player.current) {
-                      player.current.volume = vol / 100;
-
-                      player.current.muted = vol === 0;
-                    }
+                    dispatch({
+                      type: "VOLUME",
+                      payload: e.target.valueAsNumber,
+                    });
                   }}
                   className="custom-slider peer [&::-webkit-slider-thumb]:bg-accent absolute size-full appearance-none outline-none"
                 />
@@ -276,14 +322,12 @@ export default function Music() {
             loop={state.loop}
             ref={player}
             src={currentSong?.fileURL || undefined}
-            onCanPlay={handleCanPlay}
-            onLoadedMetadata={(e) => {
+            onCanPlay={play}
+            onLoadedMetadata={() => {
               dispatch({
                 type: "DURATION",
                 payload: player.current?.duration || 0,
               });
-
-              e.currentTarget.volume = state.volume / 100;
             }}
             onEnded={() => {
               if (!currentSong) return;

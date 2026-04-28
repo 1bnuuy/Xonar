@@ -1,13 +1,18 @@
 "use client";
 
-import { Label } from "@/comp/assets/label";
+import { useLogout } from "@/comp/logic/auth/logout";
 import { useData } from "@/comp/logic/get";
-import { LOGOUT } from "@/comp/logic/auth/logout";
+
 import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function Profile() {
-  const { username } = useData();
+  const { email } = useData();
+  const { mutate } = useLogout();
+
+  const Logout = () => {
+    mutate(undefined);
+  };
 
   return (
     <section className="content relative flex h-dvh w-full flex-col items-center gap-y-10 overflow-hidden">
@@ -27,13 +32,12 @@ export default function Profile() {
         </div>
       </div>
 
-      <span>{`Hi, ${username}!`}</span>
-      <button onClick={() => LOGOUT()}>Logout</button>
-      <button onClick={() => console.log(localStorage.getItem("token"))}>
-        Get token
-      </button>
-      <button onClick={() => console.log(localStorage.getItem("refreshToken"))}>
-        Get refresh token
+      <span>{`Hi, ${email}!`}</span>
+      <button
+        onClick={Logout}
+        className="bg-accent text-contrast-II cursor-pointer rounded-md px-4 py-1"
+      >
+        Logout
       </button>
     </section>
   );

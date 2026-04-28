@@ -3,13 +3,20 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEye } from "@fortawesome/free-regular-svg-icons";
 
-import { LOGIN } from "@/comp/logic/auth/login";
-
 import { AuthInputType, AuthType } from "./type";
 
+import { useLogin } from "@/comp/logic/auth/login";
+import { LoginType } from "@/comp/logic/type";
+
 export default function Login({ auth, disAuth }: AuthType) {
-  const email = auth.email.trim();
-  const password = auth.password.trim();
+  const { mutate } = useLogin();
+
+  const email = auth.email;
+  const password = auth.password;
+
+  const Login = ({ email, password }: LoginType) => {
+    mutate({ email, password });
+  };
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-6">
@@ -23,24 +30,19 @@ export default function Login({ auth, disAuth }: AuthType) {
 
       <form
         autoComplete="off"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
 
-          if (!email || !password) {
-            console.error("Login fields can't be blank");
-            return;
-          }
-
-          LOGIN({ username: email, password: password });
+          Login({ email: email.trim(), password: password.trim() });
         }}
-        className="flex w-11/12 max-w-[500px] min-w-75 flex-col items-center justify-center gap-y-4"
+        className="flex w-11/12 max-w-125 min-w-75 flex-col items-center justify-center gap-y-4"
       >
         <Input auth={auth} disAuth={disAuth} type="EMAIL" />
         <Input auth={auth} disAuth={disAuth} type="PASSWORD" />
 
         <button
           type="submit"
-          className="bg-accent text-contrast-II w-full rounded-md py-2 text-lg font-semibold"
+          className="bg-accent text-contrast-II w-full cursor-pointer rounded-md py-2 text-lg font-semibold"
         >
           Create
         </button>
@@ -58,7 +60,7 @@ export default function Login({ auth, disAuth }: AuthType) {
 
 const Input = ({ auth, disAuth, type }: AuthInputType) => {
   return (
-    <div className="bg-tertiary relative flex h-[45px] w-full items-center gap-x-4 overflow-hidden rounded-md px-3">
+    <div className="bg-tertiary relative flex h-11.25 w-full items-center gap-x-4 overflow-hidden rounded-md px-3">
       <input
         autoComplete="off"
         required

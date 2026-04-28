@@ -11,3 +11,16 @@ export type BorderType = {
 export type LabelType = {
   text: string;
 };
+
+export type PendingType = {
+  color:
+    | "bg-primary"
+    | "bg-secondary"
+    | "bg-tertiary"
+    | "bg-accent"
+    | "bg-muted"
+    | "bg-subtext";
+  scale: number;
+  height: string;
+  isAbsolute: boolean;
+};

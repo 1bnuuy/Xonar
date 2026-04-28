@@ -5,26 +5,39 @@ import { useReducer } from "react";
 import Login from "./login";
 import Register from "./register";
 import { AuthReducer, InitialAuth } from "./var";
+import { useToast } from "@/comp/toast/main";
 
 export default function Auth() {
+  const { TOAST } = useToast();
   const [auth, disAuth] = useReducer(AuthReducer, InitialAuth);
 
   return (
     <section className="bg-primary relative flex h-dvh w-full items-center justify-between max-sm:px-4">
       <div className="z-20 flex size-full items-center justify-center sm:pl-10">
         {auth.type === "REGISTER" ? (
-          <Register auth={auth} disAuth={disAuth}/>
+          <Register auth={auth} disAuth={disAuth} />
         ) : (
-          <Login auth={auth} disAuth={disAuth}/>
+          <Login auth={auth} disAuth={disAuth} />
         )}
       </div>
 
       <button
-        className="bg-accent absolute bottom-0 left-1/2 -translate-x-1/2 size-70! z-40 cursor-pointer rounded-full"
-        onClick={() => disAuth({ type: "SWITCH" })}
+        className="bg-accent absolute bottom-0 left-1/2 z-40 size-70! -translate-x-1/2 cursor-pointer rounded-full"
+        onClick={() => {
+          TOAST({ state: "SUCCESS", message: "YO" });
+          disAuth({ type: "SWITCH" });
+        }}
       >
         {auth.type}
       </button>
+
+      <button
+        className="absolute bottom-0 left-45 z-40 size-70! cursor-pointer rounded-full bg-red-300"
+        onClick={() => {
+          TOAST({ state: "ERROR", message: "YO" });
+          disAuth({ type: "SWITCH" });
+        }}
+      ></button>
 
       <Svg />
     </section>

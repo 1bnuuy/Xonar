@@ -32,17 +32,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid AuthDTO dto) {
         AuthResponse response = authService.registerService(dto);
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", response.refreshToken())
-            .httpOnly(true)
-            .secure(true) 
-            .path("/")
-            .maxAge(7 * 24 * 60 * 60)
-            .sameSite("Strict")
-            .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .header(HttpHeaders.SET_COOKIE, cookie.toString())
-            .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
     @PostMapping("/auth/login")
@@ -53,8 +43,8 @@ public class AuthController {
             .httpOnly(true)
             .secure(true) // false for local development (http://), otherwise true
             .path("/")
-            .maxAge(7 * 24 * 60 * 60)
-            .sameSite("Strict")
+            .maxAge(24 * 60 * 60) // In seconds
+            .sameSite("None")
             .build();
 
         return ResponseEntity.ok()

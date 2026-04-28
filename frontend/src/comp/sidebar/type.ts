@@ -1,4 +1,5 @@
 import { InitialUtilityType, UtilityActionType } from "@/app/_/type";
+import { ToastContentType } from "../toast/type";
 
 export type ModalType = {
   utility: InitialUtilityType;
@@ -10,12 +11,15 @@ export type TitleType = {
   disUtility: React.Dispatch<UtilityActionType>;
   input: React.RefObject<HTMLInputElement | null>;
   text: string
+  isPending: boolean
+  TOAST: (content: ToastContentType) => void
 };
 
 export type FileType = {
   utility: InitialUtilityType
   disUtility: React.Dispatch<UtilityActionType>;
-  input: React.RefObject<HTMLInputElement | null>;
+  audio: React.RefObject<HTMLInputElement | null>;
+  image: React.RefObject<HTMLInputElement | null>;
 };
 
 export type InputType = {

@@ -27,7 +27,7 @@ export default function Header({ utility, disUtility, input }: HeaderType) {
           },
         }}
         key="searchbar"
-        className="bg-tertiary relative flex h-[45px] max-w-[400px] min-w-[45px] items-center gap-x-2 overflow-hidden rounded-md px-0.5"
+        className="bg-tertiary relative flex h-11.25 max-w-100 min-w-11.25 items-center gap-x-2 overflow-hidden rounded-md px-0.5"
       >
         <motion.input
           variants={{
@@ -52,7 +52,7 @@ export default function Header({ utility, disUtility, input }: HeaderType) {
           className="placeholder:text-subtext size-full pl-3 outline-none"
         />
 
-        <p className="flex size-[45px] shrink-0 items-center justify-center">
+        <p className="flex size-11.25 shrink-0 items-center justify-center">
           <FontAwesomeIcon
             icon={faMagnifyingGlass}
             className="text-subtext text-xl"

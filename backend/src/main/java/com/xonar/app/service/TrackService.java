@@ -45,24 +45,35 @@ public class TrackService {
     }
 
     @Transactional
-    public TrackDTO createService(TrackDTO dto, MultipartFile file) {
-        if (trackRepository.existsByTitleIgnoreCaseAndOwner(dto.getTitle(), getCurrentOwner()))
+    public TrackDTO createService(TrackDTO dto, MultipartFile file, MultipartFile image) {
+        if (trackRepository.existsByTitleAndArtistAndOwnerAllIgnoreCase(dto.getTitle(), dto.getArtist(), getCurrentOwner()))
             throw new ConflictException("You already have this track");
 
         try {
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+            Map<?, ?> audioRes = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                 "resource_type", "video", // Cloudinary treats audio as 'video', I found this out the hard way
-                "folder", "xonar/tracks" + getCurrentOwner(),
-                "public_id", dto.getTitle().replaceAll("\\s+", "_"),
+                "folder", "xonar/" + getCurrentOwner().replaceAll("[@.]", "_"),
+                "public_id", dto.getTitle().replaceAll("\\s+", "_")+ "_" + System.currentTimeMillis(),
                 "secure", true
             ));
 
-            String url = (String) uploadResult.get("secure_url");
+            Map<?, ?> imageRes = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.asMap(
+                "resource_type", "image",
+                "folder", "xonar/" + getCurrentOwner().replaceAll("[@.]", "_"),
+                "public_id", dto.getTitle().replaceAll("\\s+", "_")+ "_" + System.currentTimeMillis(),
+                "secure", true
+            ));
 
-            if (url == null) 
+            String audioUrl = (String) audioRes.get("secure_url");
+            String imageUrl = (String) imageRes.get("secure_url");
+
+            String audioPublicId = (String) audioRes.get("public_id");
+            String imagePublicId = (String) imageRes.get("public_id");
+
+            if (audioUrl == null || imageUrl == null) 
                 throw new ServiceException("Cloudinary failed to return a secure URL");
         
-            TrackEntity entity = trackMapper.toEntity(dto, getCurrentOwner(), url);
+            TrackEntity entity = trackMapper.toEntity(dto, getCurrentOwner(), audioUrl, imageUrl, imagePublicId, audioPublicId);
 
             if (entity == null) 
                 throw new ServiceException("Failed to map track data");
@@ -98,6 +109,22 @@ public class TrackService {
         if (!entity.getOwner().equalsIgnoreCase(getCurrentOwner())) 
             throw new AccessDeniedException("You do not have permission to delete this track");
 
-        trackRepository.delete(entity);
+        try {
+            cloudinary.uploader().destroy(entity.getFilePublicId(), ObjectUtils.asMap(
+                "resource_type", "video",
+                "invalidate", true
+            ));
+
+            cloudinary.uploader().destroy(entity.getCoverPublicId(), ObjectUtils.asMap(
+                "resource_type", "image",
+                "invalidate", true
+            ));
+
+            trackRepository.delete(entity);
+            
+        } catch (IOException e) {
+            throw new ServiceException("Cloudinary deletion failed: " + e.getMessage());
+        }
+        
     }
 }

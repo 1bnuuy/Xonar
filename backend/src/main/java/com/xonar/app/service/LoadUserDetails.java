@@ -16,12 +16,12 @@ public class LoadUserDetails implements UserDetailsService {
     private final AuthRepository authRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AuthEntity user = authRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User " + username + " doesn't exist"));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        AuthEntity user = authRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User " + email + " doesn't exist"));
 
         return org.springframework.security.core.userdetails.User
-            .withUsername(user.getUsername())
+            .withUsername(user.getEmail())
             .password(user.getPassword())
             .roles(user.getRole())
             .build();

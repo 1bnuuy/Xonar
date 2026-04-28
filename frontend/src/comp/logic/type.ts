@@ -1,6 +1,6 @@
 export type DataType = {
   id: string | null;
-  cover: string;
+  coverURL: string;
   title: string;
   artist: string;
   fileURL: string;
@@ -12,32 +12,32 @@ export type DataContextType = {
   FETCH: () => Promise<void>;
   loading: boolean;
   authenticated: boolean;
-  username: string
+  email: string;
 };
 
 export type ClientReloadType = {
   url: string;
-  options?: RequestInit
-}
+  options?: RequestInit;
+};
 
 export type PostType = {
-  cover: string;
+  cover: File;
   title: string;
   artist: string;
-  file: File
-}
+  file: File;
+};
 
 export type PatchType = {
   id: string;
-} & Partial<Omit<DataType, "id">>;
+};
 
 export type DeleteType = {
   id: string;
-} & Partial<Omit<DataType, "id">>;
+};
 
 export type RegisterType = {
-  username: string;
+  email: string;
   password: string;
 };
 
-export type LoginType = RegisterType
+export type LoginType = RegisterType;

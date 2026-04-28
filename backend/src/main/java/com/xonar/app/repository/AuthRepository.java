@@ -8,7 +8,7 @@ import com.xonar.app.entity.AuthEntity;
 
 public interface AuthRepository extends MongoRepository<AuthEntity, String> {
 
-    Optional<AuthEntity> findByUsername(String username);
+    Optional<AuthEntity> findByEmail(String email);
 
-    boolean existsByUsernameIgnoreCase(String username);
+    boolean existsByEmailIgnoreCase(String email);
 }   

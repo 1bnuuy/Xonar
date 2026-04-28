@@ -1,6 +1,6 @@
 export const Brand = () => {
   return (
-    <svg viewBox="0 0 22 23" className="bg-accent size-[50px] rounded-md">
+    <svg viewBox="0 0 22 23" className="bg-accent size-12.5 rounded-md">
       <g>
         <path
           d="M4 10V13"

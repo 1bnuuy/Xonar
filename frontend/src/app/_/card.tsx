@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 
 import { CardType } from "./type";
 
-import { PATCH } from "@/comp/logic/data/patch";
-import { DELETE } from "@/comp/logic/data/delete";
+import { DeleteType, PatchType } from "@/comp/logic/type";
+import { usePatch } from "@/comp/logic/data/patch";
+import { useDelete } from "@/comp/logic/data/delete";
+import { useData } from "@/comp/logic/get";
 import { usePlayer } from "@/comp/music/handler";
 import { useUI } from "@/comp/assets/UI";
-
-import { _Scale, AnimsProps } from "@/lib/motion";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as faSolidHeart } from "@fortawesome/free-solid-svg-icons";
@@ -17,57 +17,55 @@ import {
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
 
-export const Card = ({
-  utility,
-  disUtility,
-  fS,
-  fetchData,
-  index,
-}: CardType) => {
+const Card = ({ disUtility, fS, ref, ...anims }: CardType) => {
   const { state, dispatch } = usePlayer();
   const { audio, toggleAudio } = useUI();
+  const { mutate: deleteMutate } = useDelete();
+  const { mutate: patchMutate } = usePatch();
+  const { FETCH } = useData();
+
+  const Delete = (id: DeleteType) => {
+    deleteMutate(
+      { id, fS },
+      {
+        onSettled: () => {
+          disUtility({ type: "HOVER", payload: null });
+          FETCH();
+        }, // onSettled runs regardless of failure or not <-- taking note
+      },
+    );
+  };
+
+  const Patch = (id: PatchType) => {
+    patchMutate(
+      { id, fS },
+      {
+        onSettled: () => {
+          disUtility({ type: "HOVER", payload: null });
+          FETCH();
+        },
+      },
+    );
+  };
 
   return (
-    <motion.div
-      layout
-      custom={index}
-      variants={{
-        hidden: { x: -50 },
-        show: (index) => ({
-          x: 0,
-          transition: {
-            delay: Math.pow(index, 0.7) * 0.05,
-            type: "spring",
-            visualDuration: AnimsProps.entrance.duration,
-            bounce: 0.5,
-          },
-        }),
-      }}
-      initial="hidden"
-      whileInView="show"
-      exit={{ opacity: 0 }}
-      viewport={{ once: true, amount: AnimsProps.entrance.viewAmount }}
-      animate={{
-        opacity:
-          utility.hoveredID !== null && utility.hoveredID !== fS.id ? 0.5 : 1,
-        scale:
-          utility.hoveredID !== null && utility.hoveredID !== fS.id ? 0.965 : 1,
-      }}
+    <div
+      ref={ref}
+      {...anims}
       onMouseEnter={() => disUtility({ type: "HOVER", payload: fS.id })}
       onMouseLeave={() => disUtility({ type: "HOVER", payload: null })}
-      onTapStart={() => disUtility({ type: "HOVER", payload: fS.id })}
-      onPanEnd={() => disUtility({ type: "HOVER", payload: null })}
       onClick={() => {
         if (!fS) return;
 
         if (state.currentID === null && audio === false) toggleAudio();
+
         dispatch({ type: "SELECT", payload: fS });
       }}
-      className={`cursor-pointer ${fS.id === "new" ? "bg-accent hover:bg-muted active:bg-muted size-[65px] self-end" : "bg-secondary h-[100px] w-full min-w-[245px] border-2"} relative flex shrink-0 items-center gap-4 overflow-hidden rounded-md px-4 max-sm:gap-2 max-sm:px-2`}
+      className="bg-secondary hover:bg-tertiary/35 active:bg-tertiary/35 relative flex h-25 w-full min-w-61.25 shrink-0 cursor-pointer items-center gap-4 overflow-hidden rounded-md border-2 px-4 max-sm:gap-2 max-sm:px-2"
     >
-      <div className="bg-accent relative size-[75px] shrink-0 rounded-md border-2 max-sm:size-[60px]">
+      <div className="bg-tertiary relative size-18.75 shrink-0 overflow-hidden rounded-md border-2 max-sm:size-15">
         <Image
-          src="/Pee.webp"
+          src={fS.coverURL || "/Pee.webp"}
           alt="bnuuy"
           fill
           loading="eager"
@@ -76,7 +74,7 @@ export const Card = ({
         />
       </div>
 
-      {/* min-w-0 fixes truncate */}
+      {/* min-w-0 on children and specified width on the parent (ex. w-full) fixes truncate */}
       <div className="flex min-w-0 flex-1 flex-col justify-center *:truncate *:capitalize">
         <h3 className="text-xl font-bold max-sm:text-lg">{fS.title}</h3>
 
@@ -86,11 +84,11 @@ export const Card = ({
       <div className="ml-auto flex items-center justify-center gap-4">
         <button
           onClick={async (e) => {
-            e.stopPropagation(); //Hinders parent's onClick from being fired
+            e.stopPropagation();
+
             if (!fS.id) return;
 
-            await PATCH({ id: fS.id, favorited: !fS.favorited });
-            fetchData();
+            Patch({ id: fS.id });
           }}
           className={`hover:text-accent cursor-pointer text-2xl ${fS.favorited ? "text-accent" : "text-subtext"}`}
         >
@@ -101,18 +99,19 @@ export const Card = ({
 
         <button
           onClick={async (e) => {
-            e.stopPropagation(); //Hinders parent's onClick from being fired
+            e.stopPropagation();
+
             if (!fS.id) return;
 
-            await DELETE({ id: fS.id, favorited: !fS.favorited });
-            disUtility({ type: "HOVER", payload: null });
-            fetchData();
+            Delete({ id: fS.id });
           }}
           className="text-subtext cursor-pointer text-2xl hover:text-red-600"
         >
           <FontAwesomeIcon icon={faTrashCan} />
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
+
+export const MotionCard = motion.create(Card);

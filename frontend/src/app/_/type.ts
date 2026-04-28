@@ -1,12 +1,10 @@
 import { DataType } from "@/comp/logic/type";
-import { InitialPlayerType, PlayerActionType } from "@/comp/music/type";
 
 export type CardType = {
-  utility: InitialUtilityType;
   disUtility: React.Dispatch<UtilityActionType>;
   fS: DataType;
-  fetchData: () => void;
   index: number;
+  ref: React.RefObject<HTMLDivElement>
 };
 
 export type HeaderType = {
@@ -15,16 +13,13 @@ export type HeaderType = {
   input: React.RefObject<HTMLInputElement | null>;
 };
 
-export type PlaylistType = {
-  state: InitialPlayerType;
-  dispatch: React.Dispatch<PlayerActionType>;
-};
-
 export type InitialUtilityType = {
   search: string;
   hoveredID: string | number | null;
   modal: boolean;
   file: Omit<DataType, "id" | "favorited">;
+  fileObject: File | null;
+  coverObject: File | null;
   tab: "FILE" | "INPUT";
 };
 
@@ -33,6 +28,8 @@ export type UtilityActionType =
   | { type: "HOVER"; payload: string | number | null }
   | { type: "MODAL" }
   | { type: "UPLOAD"; payload: Partial<Omit<DataType, "id" | "favorited">> }
+  | { type: "SELECT_FILE"; payload: File }
+  | { type: "SELECT_COVER"; payload: File }
   | { type: "RESET" }
   | { type: "TAB"; payload?: "FILE" | "INPUT" };
 

@@ -9,7 +9,7 @@ import com.xonar.app.entity.AuthEntity;
 public class AuthMapper {
     public AuthEntity toEntity(AuthDTO dto, String password) {
         return AuthEntity.builder()
-            .username(dto.getUsername())
+            .email(dto.getEmail())
             .password(password)
             .role(dto.getRole())
             .build();
@@ -18,7 +18,7 @@ public class AuthMapper {
     public AuthDTO toDTO(AuthEntity entity) {
         return AuthDTO.builder()
             .id(entity.getId())
-            .username(entity.getUsername())
+            .email(entity.getEmail())
             .role(entity.getRole())
             .refreshToken(entity.getRefreshToken())
             .build();

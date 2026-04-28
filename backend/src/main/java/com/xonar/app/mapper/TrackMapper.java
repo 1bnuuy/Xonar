@@ -9,13 +9,15 @@ import com.xonar.app.entity.TrackEntity;
 public class TrackMapper {
     // Pass the user inputs to database
     // No .id is defined, toEntity() will ignore it even when user tries to define an ID
-    public TrackEntity toEntity(TrackDTO dto, String owner, String fileURL) {
+    public TrackEntity toEntity(TrackDTO dto, String owner, String fileURL, String coverURL, String coverPublicId, String filePublicId) {
         return TrackEntity.builder()
             .owner(owner)
-            .cover(dto.getCover())
+            .coverURL(coverURL)
+            .coverPublicId(coverPublicId)
             .title(dto.getTitle())
             .artist(dto.getArtist())
             .fileURL(fileURL)
+            .filePublicId(filePublicId)
             .favorited(dto.getFavorited())
             .build();
     }
@@ -25,7 +27,7 @@ public class TrackMapper {
     public TrackDTO toDTO(TrackEntity entity) {
         return TrackDTO.builder()
             .id(entity.getId())
-            .cover(entity.getCover())
+            .coverURL(entity.getCoverURL())
             .title(entity.getTitle())
             .artist(entity.getArtist())
             .fileURL(entity.getFileURL())

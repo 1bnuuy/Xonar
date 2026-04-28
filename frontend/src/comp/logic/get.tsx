@@ -1,10 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
 
-import { DataContextType, DataType } from "./type";
-import { API_URL } from "./api";
+import { DataContextType } from "./type";
+import { API_URL, QUERY_KEYS } from "./key";
 import { clientReload } from "./client";
+
+import { useQuery } from "@tanstack/react-query";
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
@@ -20,55 +22,65 @@ export default function DataProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [data, setData] = useState<DataType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
+  // useQuery() hook executes its queryFn the moment the component mounts (no manual useEffect() uh huh)
 
-  const FETCH = async () => {
-    setLoading(true);
-
-    try {
-      const resAuth = await clientReload({
+  const {
+    data: auth,
+    isLoading: authLoading,
+    refetch: authRefetch,
+  } = useQuery({
+    queryKey: QUERY_KEYS.AUTH,
+    queryFn: async () => {
+      const res = await clientReload({
         url: `${API_URL}/dashboard`,
         options: { credentials: "include" },
       });
 
-      if (!resAuth.ok) {
-        setAuthenticated(false);
-        return;
-      }
+      if (!res.ok) throw new Error("Unauthorized");
 
-      const auth = await resAuth.json();
-      setAuthenticated(true);
-      setUsername(auth.username);
+      return await res.json();
+    },
+    retry: false,
+  });
 
-      const resData = await clientReload({
+  const isAuthenticated = !!auth;
+
+  const {
+    data: rawData,
+    isLoading: dataLoading,
+    refetch: dataRefetch,
+  } = useQuery({
+    queryKey: QUERY_KEYS.DATA,
+    queryFn: async () => {
+      const res = await clientReload({
         url: `${API_URL}/data`,
         options: { credentials: "include" },
       });
 
-      if (!resData.ok) throw new Error("Fetch failed");
+      if (!res.ok) throw new Error("Fetch failed");
 
-      const data = await resData.json();
-      setData(Array.isArray(data) ? data : [data]);
-    } catch (err) {
-      setAuthenticated(false);
-      console.error("Fetch error: ", err);
-    } finally {
-      setLoading(false);
-    }
+      const json = await res.json();
+
+      return Array.isArray(json) ? json : [json];
+    },
+    retry: false,
+  });
+
+  const FETCH = async () => {
+    const authResult = await authRefetch();
+    if (authResult.data) await dataRefetch();
   };
 
-  useEffect(() => {
-    FETCH();
-  }, []);
-
-  return (
-    <DataContext.Provider
-      value={{ data, FETCH, loading, authenticated, username }}
-    >
-      {children}
-    </DataContext.Provider>
+  const value = useMemo(
+    () => ({
+      data: rawData || [],
+      FETCH,
+      loading: authLoading || (isAuthenticated && dataLoading),
+      authenticated: isAuthenticated,
+      email: auth?.email || "",
+    }),
+    [auth, rawData, authLoading, dataLoading, isAuthenticated],
   );
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

@@ -14,7 +14,7 @@ import lombok.Setter;
 @Builder
 public class AuthDTO {
     private String id;
-    @NotBlank private String username;
+    @NotBlank private String email; 
     @NotBlank private String password;
     private String refreshToken; 
     @Builder.Default private String role = "USER";

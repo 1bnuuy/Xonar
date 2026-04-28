@@ -9,6 +9,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.xonar.app.exception.status.ConflictException;
 import com.xonar.app.exception.status.NotFoundException;
@@ -32,8 +33,8 @@ public class GlobalException {
         String errors = ex.getBindingResult()
             .getFieldErrors()
             .stream()
-            .map(error -> error.getField() + " - " + error.getDefaultMessage())
-            .collect(Collectors.joining(", "));
+            .map(error -> error.getField().substring(0,1).toUpperCase() + error.getField().substring(1) + " " + error.getDefaultMessage())
+            .collect(Collectors.joining(". "));
 
         return response(HttpStatus.BAD_REQUEST, "Input Failure", errors); // 400
     }
@@ -45,7 +46,7 @@ public class GlobalException {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> credentialsException(BadCredentialsException ex) {
-        return response(HttpStatus.UNAUTHORIZED, "Authentication Failure", "Invalid username or password"); // 401
+        return response(HttpStatus.UNAUTHORIZED, "Authentication Failure", "Invalid email or password"); // 401
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -61,6 +62,11 @@ public class GlobalException {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> conflictException(ConflictException ex) {
         return response(HttpStatus.CONFLICT, "Resource Conflicts", ex.getMessage()); // 409
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> sizeException(MaxUploadSizeExceededException ex) {
+        return response(HttpStatus.PAYLOAD_TOO_LARGE, "Upload Size Exceeded", "File is too large! Maximum allowed: 15MB"); // 409
     }
 
     @ExceptionHandler(ServiceException.class)

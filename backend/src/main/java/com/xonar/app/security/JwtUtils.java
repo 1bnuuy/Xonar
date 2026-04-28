@@ -19,7 +19,7 @@ public class JwtUtils {
         return Jwts.builder()
             .subject(user.getUsername())
             .issuedAt(new Date())
-            .expiration(new Date((new Date()).getTime() + 15 * 60 * 1000)) // 15 mins
+            .expiration(new Date((new Date()).getTime() + 15 * 60 * 1000)) // 15 mins - In Ms
             .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
             .compact();
     }
@@ -29,7 +29,7 @@ public class JwtUtils {
         return Jwts.builder()
             .subject(user.getUsername())
             .issuedAt(new Date())
-            .expiration(new Date((new Date()).getTime() + 7 * 24 * 60 * 60 * 1000)) // 7 days
+            .expiration(new Date((new Date()).getTime() + 24 * 60 * 60 * 1000)) // 1 days
             .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
             .compact();
     }

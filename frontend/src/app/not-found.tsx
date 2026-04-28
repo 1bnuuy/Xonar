@@ -14,7 +14,7 @@ export default function ErrorPage() {
           404
         </span>
 
-        <svg className="z-10 h-[225px] w-[315px]" viewBox="0 0 750 457">
+        <svg className="z-10 h-56.25 w-78.75" viewBox="0 0 750 457">
           <g
             id="Group_201"
             data-name="Group 201"
@@ -281,7 +281,7 @@ export default function ErrorPage() {
         </svg>
 
         <svg
-          className="absolute top-1/2 left-1/2 -z-20 size-[650px] -translate-1/2"
+          className="absolute top-1/2 left-1/2 -z-20 size-162.5 -translate-1/2"
           viewBox="0 0 2000 2000"
         >
           <path
@@ -297,7 +297,7 @@ export default function ErrorPage() {
         whileHover="hover"
         whileTap="tap"
         href="/"
-        className="bg-accent text-primary hover:bg-muted active:bg-muted z-20 min-w-[190px] rounded-md px-5 py-2 text-xl"
+        className="bg-accent text-primary hover:bg-muted active:bg-muted z-20 min-w-47.5 rounded-md px-5 py-2 text-xl"
       >
         Take Me Home
       </MotionLink>

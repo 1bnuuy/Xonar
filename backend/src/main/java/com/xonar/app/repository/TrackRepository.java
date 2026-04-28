@@ -9,6 +9,6 @@ import com.xonar.app.entity.TrackEntity;
 //CRUD Functionality
 //Track is the object stored in mongoDB, and String is the type of Track's id
 public interface TrackRepository extends MongoRepository<TrackEntity, String> {
-    boolean existsByTitleIgnoreCaseAndOwner(String title, String name);
+    boolean existsByTitleAndArtistAndOwnerAllIgnoreCase(String title, String artist, String name);
     List<TrackEntity> findByOwner(String owner);
 }
