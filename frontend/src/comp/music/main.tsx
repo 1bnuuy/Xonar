@@ -337,7 +337,7 @@ export default function Music() {
               );
               const isLast = currentIndex === state.song.length - 1;
 
-              if (isLast) dispatch({ type: "PAUSE" });
+              if (isLast && !state.shuffle) dispatch({ type: "PAUSE" });
               else dispatch({ type: "NEXT" });
             }}
             className="hidden"

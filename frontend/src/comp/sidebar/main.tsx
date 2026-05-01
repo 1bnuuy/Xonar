@@ -20,7 +20,6 @@ import { useData } from "../logic/get";
 import { Brand } from "./brand";
 import { links } from "./var";
 import Modal from "./modal";
-import { useToast } from "../toast/main";
 
 const MotionLink = motion.create(Link);
 
@@ -29,7 +28,6 @@ export default function Sidebar() {
   const { audio } = useUI();
   const [utility, disUtility] = useReducer(UtilityReducer, InitialUtility);
   const { FETCH, authenticated, email } = useData();
-  const { TOAST } = useToast();
 
   const isAvail = AvailablePaths.includes(path);
 

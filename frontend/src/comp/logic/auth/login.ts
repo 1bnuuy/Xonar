@@ -34,6 +34,7 @@ export const useLogin = () => {
 
       return result;
     },
+
     onSuccess: (_res, vars) => {
       const { email } = vars;
 
@@ -50,6 +51,7 @@ export const useLogin = () => {
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH });
     },
+    
     onError: (err) => {
       setTimeout(() => {
         TOAST({

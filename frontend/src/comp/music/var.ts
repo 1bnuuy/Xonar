@@ -62,12 +62,30 @@ export const PlayerReducer: (
         time: 0,
       };
 
-    case "NEXT":
+    case "NEXT": {
       if (state.song.length === 0) return state;
 
-      const currentN = state.song.findIndex((s) => s.id === state.currentID);
-      const safeN = currentN === -1 ? 0 : currentN;
-      const nextIndex = (safeN + 1) % state.song.length;
+      let nextIndex: number;
+
+      if (state.shuffle) {
+        const currentIndex = state.song.findIndex(
+          (s) => s.id === state.currentID,
+        );
+        const availIndex = state.song
+          .map((_, i) => i)
+          .filter((i) => i !== currentIndex);
+
+        if (availIndex.length > 0) {
+          const random = Math.floor(Math.random() * availIndex.length);
+          nextIndex = availIndex[random];
+        } else {
+          nextIndex = 0;
+        }
+      } else {
+        const currentN = state.song.findIndex((s) => s.id === state.currentID);
+        const safeN = currentN === -1 ? 0 : currentN;
+        nextIndex = (safeN + 1) % state.song.length;
+      }
 
       return {
         ...state,
@@ -75,6 +93,7 @@ export const PlayerReducer: (
         pause: false,
         time: 0,
       };
+    }
 
     case "PAUSE":
       return { ...state, pause: !state.pause };

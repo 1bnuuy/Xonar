@@ -116,7 +116,7 @@ export default function Modal({ utility, disUtility }: ModalType) {
                   disUtility={disUtility}
                   input={inputFile}
                   text="Add new track"
-                  isPending
+                  isPending={isPending}
                   TOAST={TOAST}
                 />
 
@@ -171,7 +171,7 @@ export default function Modal({ utility, disUtility }: ModalType) {
                   disUtility={disUtility}
                   input={inputFile}
                   text="Track details"
-                  isPending
+                  isPending={isPending}
                   TOAST={TOAST}
                 />
 
